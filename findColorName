@@ -1,0 +1,194 @@
+#!/usr/bin/perl -w
+#
+# 2010-09-05: Written by Steven J. DeRose.
+# 2011-01-12 sjd: Add Euclidian distance.
+# 2012-02-23 sjd: Show RGB values for the found color. Add -file option.
+#
+# To do:
+#     CMYZ, HSV, and Pantone?
+
+#
+
+use strict;
+use Getopt::Long;
+
+our $VERSION_DATE = "2012-02-23";
+
+my $manhattan    = 0;
+my $quiet        = 0;
+my $rgbFile      = "/etc/X11/rgb.txt";
+my $verbose      = 0;
+
+
+###############################################################################
+#
+Getopt::Long::Configure ("ignore_case");
+my $result = GetOptions(
+    "file=s"        => \$rgbFile,
+    "h|help"        => sub { system("perldoc $0") || system "perldoc $0"; exit; },
+    "manhattan!"    => \$manhattan,
+    "q!"            => \$quiet,
+    "v|verbose+"    => \$verbose,
+    "version"       => sub { showLicense(); exit; }
+    );
+
+($result) || die "Bad options.\n";
+
+(scalar @ARGV == 3) || die "Wrong number of args.\n";
+
+my $rTarget = shift;
+my $gTarget = shift;
+my $bTarget = shift;
+
+$rTarget = hex($rTarget);
+$gTarget = hex($gTarget);
+$bTarget = hex($bTarget);
+($verbose) && warn sprintf("Target = R x%02x, G x%02x, B x%02x\n",
+                           $rTarget, $gTarget, $bTarget);
+
+my @r, my @g, my @b, my @name = ();
+loadColors();
+
+my $bestIndex = -1;
+my $bestDiff = 99999;
+
+for (my $i=1; $i<scalar @r; $i++) {
+    my $diff;
+    if ($manhattan) {
+        $diff = manhattanDistance(
+            $rTarget,$gTarget,$bTarget,
+            $r[$i],  $g[$i],  $b[$i]);
+    }
+    else {
+        $diff = euclidianDistance(
+            $rTarget,$gTarget,$bTarget,
+            $r[$i],  $g[$i],  $b[$i]);
+    }
+    if ($diff < $bestDiff) {
+        $bestIndex = $i;
+        $bestDiff = $diff;
+        ($diff == 0) && last;
+    }
+}
+
+printf("Best match is '%s' (%02x %02x %02x) (diff %5.2f)\n",
+       $name[$bestIndex],
+       $r[$bestIndex], $g[$bestIndex], $b[$bestIndex],
+       $bestDiff);
+
+exit;
+
+
+
+###############################################################################
+###############################################################################
+#
+sub loadColors {
+    open(RGB, "<$rgbFile") || die
+        "Couldn't open color file at '$rgbFile'.\n";
+    while (my $rec = <RGB>) {
+        chomp $rec;
+        $rec =~ s/^\s+//;
+        my @tokens = split(/\s+/,$rec);
+        push @r, shift @tokens;
+        push @g, shift @tokens;
+        push @b, shift @tokens;
+        push @name, join(" ",@tokens);
+    }
+    close(RGB);
+}
+
+
+sub manhattanDistance {
+    my ($r1,$g1,$b1,$r2,$g2,$b2) = @_;
+    my $rd = $r1-$r2;
+    my $gd = $g1-$g2;
+    my $bd = $b1-$b2;
+    return(abs($rd) + abs($gd) + abs($bd));
+}
+
+
+sub euclidianDistance {
+    my ($r1,$g1,$b1,$r2,$g2,$b2) = @_;
+    my $rd = $r1-$r2;
+    my $gd = $g1-$g2;
+    my $bd = $b1-$b2;
+    return(sqrt($rd*$rd + $gd*$gd + $bd*$bd));
+}
+
+
+
+###############################################################################
+###############################################################################
+#
+
+=pod
+
+=head1 Usage
+
+findColorName [options] r g b
+
+Searches the X Windows color-name definition file, for the color closest
+to the specified rgb color. 'Closest' is determined by the sum of how
+different r, g, and b are.
+
+
+
+=head1 Options
+
+(prefix 'no' to negate where applicable)
+
+=over
+
+=item * B<--file> I<path>
+
+Look for the color definition file at I<path>, instead of the
+default "/etc/X11/rgb.txt".
+
+=item * B<--manhattan>
+
+Measure color difference by sum
+or R, G, and B difference, instead of the default Euclidean distance.
+
+=item * B<--quiet> OR B<-q>
+Suppress most messages.
+
+=item * B<--verbose> OR B<-v>
+Add more messages (repeatable).
+
+=item * B<--version>
+
+Show version/license info and exit.
+
+=back
+
+
+
+=head1 Known Bugs/Limitations
+
+(please report any other bugs to the author):
+
+There is no support for color-spaces other than RGB.
+
+
+
+=head1 Related commands
+
+C<showNumberInBases> -- supports #rgb colors, too.
+
+L<http://www.netfront.fr/Services/rgb2pantone/> -- a tool to convert
+RGB colors to Pantone.
+
+L<http://goffgrafix.com/pantone-rgb-100.php> -- a list of RGB/Pantone equivalents.
+
+
+
+=head1 Ownership
+
+This work by Steven J. DeRose is licensed under a Creative Commons
+Attribution-Share Alike 3.0 Unported License. For further information on
+this license, see L<http://creativecommons.org/licenses/by-sa/3.0/>.
+
+For the most recent version, see L<http://www.derose.net/steve/utilities/>.
+
+=cut

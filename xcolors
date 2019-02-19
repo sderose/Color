@@ -1,0 +1,133 @@
+#!/usr/bin/perl -w
+#
+# xcolors: Find the X11 rgb.txt file.
+#
+# ???: Written by Steven J. DeRose.
+# 2010-09-23 sjd: Clean up, Getopt, etc.
+# 2013-04-18 sjd: Clean up. Add -grep/-find.
+#
+# To do:
+#
+use strict;
+use Getopt::Long;
+
+our $VERSION_DATE = "2013-04-18";
+
+my $grep          = "";
+my $quiet         = 0;
+my $verbose       = 0;
+
+
+###############################################################################
+#
+Getopt::Long::Configure ("ignore_case");
+my $result = GetOptions(
+    "grep|find=s"             => \$grep,
+    "h|help"                  => sub { system "perldoc $0"; exit; },
+    "q!"                      => \$quiet,
+    "v+"                      => \$verbose,
+    "version"                 => sub {
+        die "Version of $VERSION_DATE, by Steven J. DeRose.\n";
+    },
+    );
+
+($result) || die "Bad options.\n";
+
+
+###############################################################################
+# Main
+#
+my @paths = (
+    "/usr/share/X11/rgb.txt",
+    "/usr/X11R6/lib/X11/rgb.txt",
+    "/usr/X11R6/share/X11/rgb.txt".
+    "/usr/share/emacs/22.2/etc/rgb.txt",
+    "/etc/X11/rgb.txt",
+    "/host/Python25/Tools/pynche/X/rgb.txt",
+    "/host/cygwin/usr/share/emacs/23.0.92/etc/rgb.txt",
+    "/opt/X11/share/X11/rgb.txt",
+    );
+
+if ($verbose) {
+    print "xcolors: Finds and displays the X Windows rgb.txt file, from:\n";
+    print "    " . join("\n    ",@paths) . "\n";
+    exit;
+}
+
+my $nFound = 0;
+for my $path (@paths) {
+    if (-f $path) {
+        $nFound++;
+        warn "File found: $path\n";
+        open(XC, "<$path");
+        while (my $rec = <XC>) {
+            if (!$grep || $rec =~ m/$grep/i) { print $rec; }
+        }
+        close(XC);
+    }
+}
+
+($nFound) ||
+    die "Can't find X11 'rgb.txt' color file (use -v to see path checked).\n";
+
+exit;
+
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+
+=pod
+
+=head1 Usage
+
+xcolors [options] file
+
+Show the X11 color-definition file. With I<--grep>, show only lines
+that match the following regex.
+
+
+
+=head1 Options
+
+(prefix 'no' to negate where applicable)
+
+=over
+
+=item * B<--grep> I<regex> or B<--find> I<--regex>
+
+Show only lines of the color file that match the given regex.
+
+=item * B<--quiet> OR B<-q>
+Suppress most messages, and avoid
+printing the content of the rgb.txt file itself (just show the path).
+
+=item * B<--verbose> OR B<-v>
+Add more messages, including the entire
+list of directories where the script tries to find rgc.txt.
+
+=item * B<--version>
+
+Show version info and exit.
+
+=back
+
+
+
+=head1 Related commands.
+
+Pretty much the same as *nix C<showrgb>.
+
+
+
+=head1 Ownership
+
+This work by Steven J. DeRose is licensed under a Creative Commons
+Attribution-Share Alike 3.0 Unported License. For further information on
+this license, see L<http://creativecommons.org/licenses/by-sa/3.0/>.
+
+For the most recent version, see L<http://www.derose.net/steve/utilities/>.
+
+=cut

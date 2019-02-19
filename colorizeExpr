@@ -1,0 +1,281 @@
+#!/usr/bin/perl -w
+#
+# Written 2012-12-06 by Steven J. DeRose.
+# 2013-09-04: Support backslash.
+# 2015-09-23: Cleanup. Add %boxDrawingCharacters.
+#
+# To do:
+#     Fix quote handling.
+#     Add -iencoding, etc.
+#     Warn on mismatched open/close type
+#     Unicode box-drawing characters
+#
+use strict;
+use sjdUtils;
+use alogging;
+
+setColors(1);
+
+my @colors = (
+   sjdUtils::getColorString("off"),
+   sjdUtils::getColorString("red"),
+   sjdUtils::getColorString("yellow"),
+   sjdUtils::getColorString("green"),
+   sjdUtils::getColorString("blue"),
+   sjdUtils::getColorString("magenta"),
+   sjdUtils::getColorString("cyan"),
+    );
+my $bad = getColorString("/red");
+
+my %boxDrawingCharacters = (
+    chr(0x2500) => 'BOX DRAWINGS LIGHT HORIZONTAL',
+    chr(0x2502) => 'BOX DRAWINGS LIGHT VERTICAL',
+    chr(0x250c) => 'BOX DRAWINGS LIGHT DOWN AND RIGHT',
+    chr(0x2510) => 'BOX DRAWINGS LIGHT DOWN AND LEFT',
+    chr(0x2514) => 'BOX DRAWINGS LIGHT UP AND RIGHT',
+    chr(0x2518) => 'BOX DRAWINGS LIGHT UP AND LEFT',
+    chr(0x251c) => 'BOX DRAWINGS LIGHT VERTICAL AND RIGHT',
+    chr(0x2524) => 'BOX DRAWINGS LIGHT VERTICAL AND LEFT',
+    chr(0x252c) => 'BOX DRAWINGS LIGHT DOWN AND HORIZONTAL',
+    chr(0x2534) => 'BOX DRAWINGS LIGHT UP AND HORIZONTAL',
+    chr(0x253c) => 'BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL',
+    chr(0x254c) => 'BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL',
+    chr(0x254e) => 'BOX DRAWINGS LIGHT DOUBLE DASH VERTICAL',
+
+    chr(0x256d) => 'BOX DRAWINGS LIGHT ARC DOWN AND RIGHT',
+    chr(0x256e) => 'BOX DRAWINGS LIGHT ARC DOWN AND LEFT',
+    chr(0x256f) => 'BOX DRAWINGS LIGHT ARC UP AND LEFT',
+    chr(0x2570) => 'BOX DRAWINGS LIGHT ARC UP AND RIGHT',
+    chr(0x2571) => 'BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT',
+    chr(0x2572) => 'BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT',
+    chr(0x2573) => 'BOX DRAWINGS LIGHT DIAGONAL CROSS',
+
+    chr(0x2574) => 'BOX DRAWINGS LIGHT LEFT',
+    chr(0x2575) => 'BOX DRAWINGS LIGHT UP',
+    chr(0x2576) => 'BOX DRAWINGS LIGHT RIGHT',
+    chr(0x2577) => 'BOX DRAWINGS LIGHT DOWN',
+);
+
+my $opener = "/";   #
+my $closer = "\\";  #
+my $spacer = "-";   #
+
+
+###############################################################################
+###############################################################################
+# Main
+#
+if (!$ARGV[0] || $ARGV[0] =~ m/^-h/) {
+    system "perldoc $0";
+    exit;
+}
+
+my $s = join(" ", @ARGV);
+print colorizeExpr($s) . "\n";
+print "\n";
+print bracketExpr($s) . "\n";
+
+exit;
+
+
+###############################################################################
+#
+sub colorizeExpr {
+    my ($s) = @_;
+    my $buf = "";
+    my $depth = 0;
+    my $inQuote = "";
+    my @cs = split(//, $s);
+    for (my $i=0; $i<scalar(@cs); $i++) {
+        my $c = $cs[$i];
+        if ($c eq "\\") {
+            $buf .= $c . ($cs[$i+1] || "");
+            $i++;
+        }
+        elsif ($inQuote ne "") {
+            $buf .= $c;
+            if ($c eq $inQuote) { $inQuote = ""; }
+        }
+        elsif ($c eq "'" || $c eq '"') {
+            $buf .= $c;
+            $inQuote = $c;
+        }
+        elsif (index("([{", $c) >= 0) {
+            $depth++;
+            $buf .= (($depth<0) ? $bad:$colors[$depth]) . $c;
+        }
+        elsif (index(")]}", $c) >= 0) {
+            $depth--;
+            $buf .= $c . (($depth<0) ? $bad:$colors[$depth]);
+        }
+        else {
+            $buf .= $c;
+        }
+    }
+    while ($depth>0) {
+        $buf .= $colors[0] . $bad . "*UNCLOSED*";
+        $depth--;
+    }
+
+    $buf .= $colors[0];
+    return($buf);
+}
+
+
+sub bracketExpr {
+    my ($s) = @_;
+    my ($changes, $maxDepth) = findChanges($s);
+    return(construct($s, $changes, $maxDepth));
+}
+
+# Return a ref to an array containing +level for opens, -level for closes.
+#
+sub findChanges {
+    my ($s) = @_;
+    my $depth = 0;
+    my $maxDepth = 0;
+    my @cs = split(//, $s);
+    my $inQuote = "";
+    my @ch = ();
+    for (my $i=0; $i<scalar(@cs); $i++) {
+        my $c = $cs[$i];
+        if ($c eq "\\") {
+            $ch[$i] = 0;
+            $i++;
+            $ch[$i] = 0;
+        }
+        elsif ($inQuote ne "") {
+            $ch[$i] = 0;
+            if ($c eq $inQuote) { $inQuote = ""; }
+        }
+        elsif ($c eq "'" || $c eq '"') {
+            $ch[$i] = 0;
+            $inQuote = $c;
+        }
+        if (index("([{", $c) >= 0) {
+            $depth++;
+            if ($depth > $maxDepth) { $maxDepth = $depth; }
+            $ch[$i] = $depth;
+        }
+        elsif (index(")]}", $c) >= 0) {
+            $ch[$i] = -$depth;
+            $depth--;
+        }
+        else {
+            $ch[$i] = 0;
+        }
+    }
+    return(\@ch, $maxDepth);
+}
+
+sub construct {
+    my ($s, $changes, $maxDepth) = @_;
+    my $arr = join("", @{$changes}) . "\n";
+    $arr =~ s/-(\d)/{ substr("*ABCDEFGHI", $1, 1); }/ge;
+    print "$arr\n";
+
+    my $buf = "";
+    for (my $curDepth=1; $curDepth<=$maxDepth; $curDepth++) {
+        my $atDepth = 0;
+        for (my $i=0; $i<scalar(@{$changes}); $i++) {
+            if ($changes->[$i] == $curDepth) {
+                $atDepth = 1;
+                $buf .= $opener;
+            }
+            elsif ($changes->[$i] == -$curDepth) {
+                $atDepth = 0;
+                $buf .= $closer;
+            }
+            elsif ($atDepth) {
+                $buf .= $spacer;
+            }
+            else {
+                $buf .= " ";
+            }
+        } # i
+        $buf .= "\n";
+    } # curDepth
+    $buf .= "$s\n";
+    return($buf);
+}
+
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+
+=pod
+
+=head1 Usage
+
+colorizeExpr 'expr'
+
+Print an expression with the scope of (), [], and {} illustrated.
+
+For example:
+
+    colorizeExpr '(1 + 2) * (2 / (3 + (4**5)))'
+
+produces:
+
+    (1 + 2) * (2 / (3 + (4**5)))
+
+
+    100000A000100002000030000CBA
+
+    /-----\   /----------------\
+                   /----------\
+                        /----\
+    (1 + 2) * (2 / (3 + (4**5)))
+
+The first line is the expression, with each part colorized by how
+deeply it is nested.
+
+The dashed lines show the scope of each sub-expression visually.
+
+The line of packed characters shows where things open and close. Digits
+show opens at a given depth, the corresponding letters (A for 1, B for 2, etc.)
+show the corresponding closes.
+
+Backslash is recognized as escaping any of the parens, brackets, or braces
+(or itself).
+
+
+
+=head1 Options
+
+(prefix 'no' to negate where applicable)
+
+=over
+
+=item * B<(none)>
+
+=back
+
+
+
+=head1 Known Bugs and Limitations
+
+Handles backslashes, but not quotes.
+
+Doesn't do anything for Unicode.
+
+No choice about what colors are used.
+
+
+
+=head1 Related commands
+
+
+
+=head1 Ownership
+
+This work by Steven J. DeRose is licensed under a Creative Commons
+Attribution-Share Alike 3.0 Unported License. For further information on
+this license, see L<http://creativecommons.org/licenses/by-sa/3.0/>.
+
+For the most recent version, see L<http://www.derose.net/steve/utilities/>.
+
+=cut
