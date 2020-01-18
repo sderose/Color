@@ -22,6 +22,7 @@ my $verbose    = 0;
 # Process options
 #
 my %getoptHash = (
+    "colorFile"         => \$theFile,
 	"gray|grey!"        => \$gray,
 	"h|help|?"          => sub { system "perldoc $0"; exit; },
 	"i|ignorecase"      => \$ignoreCase,
@@ -118,9 +119,10 @@ exit;
 makeXColorChart [options] [>destination-file]
 
 Generates an HTML file that nicely shows all the colors defined for
-X11 in the file '$theFile'. Writes to stdout.
+X11 in a file. Writes to stdout.
 
-
+By default, looks for a color-list at F</usr/X11/lib/X11/rgb.txt>.
+You might also try F</usr/share/emacs/22.1/etc/rgb.txt>.
 
 =head1 Options
 

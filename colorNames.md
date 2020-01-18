@@ -1,35 +1,33 @@
-=head1 The ColorManager package's color names
+#!/usr/bin/env less
+
+=The ColorManager package color names=
 
 The ColorManager package supplies ANSI terminal color services
 to other code. It should be fully integrated into these commands:
 
-=over
+* sjdUtils.pm, via its I<ColorManager> class
 
-=item * sjdUtils.pm, via its I<ColorManager> class
+* sjdUtils.py, via its I<ColorManager> class
 
-=item * sjdUtils.py, via its I<ColorManager> class
+* alogging.py, when owned by an sjdUtils.py instance
 
-=item * alogging.py, when owned by an sjdUtils.py instance
+* colorstring (Perl) -- not yet fully integrated.
 
-=item * colorstring (Perl) -- not yet fully integrated.
+* hilite (Perl), could better be called 'colorize'
 
-=item * hilite (Perl), could better be called 'colorize'
+* colorizeExpr (Perl), via sjdUtils.pm
 
-=item * colorizeExpr (Perl), via sjdUtils.pm
+* uncolorize (Python), via sjdUtils.py
 
-=item * uncolorize (Python), via sjdUtils.py
-
-=item * show256Colors (?), not yet integrated
-
-=back
+* show256Colors (?), not yet integrated
 
 
-=head2 Color naming conventions
+==Color naming conventions==
 
 The color names available are defined here.
 This supercedes anything in specific scripts (they I<should> match).
 
-=head3 Basic colors
+===Basic colors===
 
 The known basic color names are the usual ANSI terminal colors:
 
@@ -45,11 +43,11 @@ The known basic color names are the usual ANSI terminal colors:
 
 "off" is a synonym for "black".
 
-=head3 Basic effects
+===Basic effects===
 
 The known effect names are:
 
-    "bold"       : 1   aks 'bright'
+    "bold"       : 1   aka 'bright'
     "faint"      : 2
     "italic"     : 3   (rare)
     "underline"  : 4   aka 'ul'
@@ -58,12 +56,12 @@ The known effect names are:
     "reverse"    : 7   aka 'inverse'
     "concealed"  : 8   aka 'invisible' or 'hidden'
     "strike"     : 9   aka 'strikethru' or 'strikethrough'
-    "plain"      : 0   (can be used to express "no special effect"
+    "plain"      : 0   (can be used to express "no special effect")
 
 "blink" and "fblink" are suppressed if the environment variable B<NOBLINK>
 is set.
 
-Ideally, each effects can be turned on and off separately (so that any
+Ideally, each effect can be turned on and off separately (so that any
 combination would be possible). To turn an effect on, use the name as listed;
 to turn it off, use the name prefixed by "!", for example "!bold" to turn
 off bold.
@@ -73,12 +71,12 @@ The "bold" effect usually appears as a much brighter version of the color,
 so is often used as if it provides additional colors.
 
 Not all terminal programs support all effects (see section below).
-You can check your terminal program's support with:
+You can check your terminal program color support with:
 
     colorstring --effects
 
 
-=head3 Non-basic colors
+===Non-basic colors===
 
 A complete color name consists of:
     a foreground color F,
@@ -89,9 +87,6 @@ These are separated by "/". If leading components are omitted, their
 following slash must still be present (so one can tell the difference
 between foreground and background colors, which have the same names).
 
-Multiple simultaneous effects are not yet available; but if/when they are,
-the additional effects will be expressed by subsequent "/"-separated tokens.
-
 For example:
     red/blue
     yellow/black/italic
@@ -100,8 +95,11 @@ For example:
 Setting the foreground
 and background colors the same is available, though unreadable.
 
+Multiple simultaneous effects are not yet available; but if/when they are,
+the additional effects will be expressed by subsequent "/"-separated tokens.
 
-=head2 Name patterns and combinations
+
+==Name patterns and combinations==
 
 For any foreground basic color name F,
 background basic color name B (from the color list), and
@@ -144,51 +142,43 @@ list of the desired effect name in the I<effects> parameter to the constructor.
 
 F, G, and/or E can be combined in these ways:
 
-=over
+* F -- foreground color F
 
-=item * F -- foreground color F
+* /B -- background color B
 
-=item * /B -- background color B
+* F/B -- foreground color F with background color B
 
-=item * F/B -- foreground color F with background color B
+* E -- effect E
 
-=item * E -- effect E
+* E/F -- effect E with foreground color F (for example, I<bold/red>)
 
-=item * E/F -- effect E with foreground color F (for example, I<bold/red>)
+* E/F/B -- effect E with foreground color F and background color B
 
-=item * E/F/B -- effect E with foreground color F and background color B
-
-=item * E//B -- effect E with background color B
-
-=back
+* E//B -- effect E with background color B
 
 
-=head2 Support in some common terminal programs:
+==Support in some common terminal programs:==
 
-=over
-
-=item * B<Terminal> (Mac OS X):  blink, bold, faint, inverse, invisible, ul
+* B<Terminal> (Mac OS X):  blink, bold, faint, inverse, invisible, ul
 (not fblink, italic, or strike).
 
-=item * B<xterm>: blink (but only when the window is focused),
+* B<xterm>: blink (but only when the window is focused),
 bold, inverse, invisible, italic, strike, ul
 (not faint, fblink).
 
-=item * B<putty>: bold, inverse, ul
+* B<putty>: bold, inverse, ul
 (not blink, faint, fblink, invisible, italic, or strike).
 
-=item * B<gnone-terminal>: bold, faint, inverse, invisible, italic, strike, ul
+* B<gnone-terminal>: bold, faint, inverse, invisible, italic, strike, ul
 (not blink or fblink).
 Profiles have an "Allow bold text" setting.
 
-=item * B<iterm2>:
+* B<iterm2>:
 bold (set to true bold or to bright),
-italic (preference setting, but doesn't work for me,
+italic (preference setting, but does not work for me,
 blink (preference setting),
 faint,
 ul.
-
-=back
 
 You can use C<colorstring> with the I<--effects> or I<--list> options
 to check support by displaying samples.
@@ -197,7 +187,7 @@ I<--xterm256> is not yet supported. That, and/or color names from
 the X F<rgb.txt> file may be supported in the future.
 
 
-=head2 The ANSI terminal escapes
+==The ANSI terminal escapes==
 
 The basic commands are coded in the form:
     ESC [ n1;n2...m
@@ -225,7 +215,8 @@ Effects numbers:
     9 "strike"    strikethru (rarely supported)
    10...19        select font n (rarely supported)
 
-Xterm adds controls to turn off some of these effects:
+Xterm adds controls to turn off some of these effects (I have not verified that
+the list below is correct or how widely supported this is):
    22             bold off
    27             inverse off
    24             ul off
@@ -241,7 +232,7 @@ Example: for bold red on cyan background:
     \e[1;31;46m
 
 
-=head2 Expressing escape strings
+==Expressing escape strings==
 
 It may be difficult or impossible to type such escape sequences by hand,
 or to put a literal ESC character inside a string. C<colorstring> can provide
@@ -252,4 +243,8 @@ that you can paste directly into a C<bash> prompt string, use:
 
 which will print C<\[\e[31m\]>.
 
+==Rights==
+
+This naming scheme is by Steven J. DeRose. I hereby dedicate it to the
+public domain.
 
