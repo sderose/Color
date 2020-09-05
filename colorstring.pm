@@ -28,7 +28,7 @@
 #     Add alternate setup to tag stuff with HTML instead.
 #     Use the ColorManager class from sjdUtils.pl!
 #     Consider mappings to special Unicode alphabets (cf SimplifyUnicode,
-#         mathUnicode.py, ord).
+#         mathAlphanumerics.py, ord).
 #     Offer alternate color sets for setenv, for light vs. dark backgrounds.
 #     lsset should support replacing all mappings for a given color.
 #     Use rgb.txt with xterm-256color to pick by name?
@@ -89,7 +89,7 @@ to your F<.emacs> or other init file:
 
 =head2 Color names used
 
-The color names available are defined in F<bingit/SHELL/colorNames.pod>,
+The color names available are defined in F<bingit/SHELL/colorNames.md>,
 which supercedes anything in specific scripts (they I<should> match).
 
 
@@ -305,7 +305,7 @@ Is not entirely in sync with my related commands.
 
 =head1 Related commands and files:
 
-C<colorNames.pod> -- documentation about color names and usage.
+C<colorNames.md> -- documentation about color names and usage.
 
 C<ColorManager.pm> -- provides the functionality used here.
 
@@ -319,8 +319,8 @@ C<sjdUtils.py> -- Python version of C<sjdUtils.pm>.
 
 C<alogging.py>, C<colorstring> (Perl), C<hilite> (Perl).
 
-C<mathUnicode.py> -- Unicode has many alternate forms of the Latin and Greek alphabets. See bin/data/unicodeLatinAlphabets.py for more information,
-and PYTHONLIBS/mathUnicode.py for support for transliterating into them.
+C<mathAlphanumerics.py> -- Unicode has many alternate forms of the Latin and Greek alphabets. See bin/data/unicodeLatinAlphabets.py for more information,
+and PYTHONLIBS/mathAlphanumerics.py for support for transliterating into them.
 
 
 =head2 Related *nix utilities

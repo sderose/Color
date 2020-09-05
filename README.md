@@ -7,11 +7,12 @@ Many of my scripts support a --color option, which usually default to ON
 if environment variable USE_COLOR is set, otherwise to OFF.
 
 See: [http://github.com/sderose/Color].
+See also: ../PYTHONLIBS/ColorManager.py
 
 * colorConvert.py --
 
-* colorNames.pod -- Documentation of my conventional color names.
-See colorNames.pod or -h for individual commands for the details.
+* colorNames.md -- Documentation of my conventional color names.
+See colorNames.md or -h for individual commands for the details.
 Briefly, you can specify up to
 3 slash-separated tokens: an effect, a foreground color, a background color.
 For example:

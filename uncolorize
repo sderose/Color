@@ -1,72 +1,86 @@
 #!/usr/bin/env python
 #
-# uncolorize
-#
-# 2015-08-31: Written by Steven J. DeRose.
-#
-# To do:
+# uncolorize: Remove ANSI terminal color escape sequences.
+# 2015-08-31; Written by Steven J. DeRose.
 #
 from __future__ import print_function
 import sys
 import os
-import re
 import argparse
-#import string
-#import math
-#import subprocess
-import codecs, locale
+import codecs
 
 from sjdUtils import sjdUtils
-from alogging import ALogger
 from MarkupHelpFormatter import MarkupHelpFormatter
 
-__version__ = "2015-09-17"
+__metadata__ = {
+    'title'        : "uncolorize",
+    'rightsHolder' : "Steven J. DeRose",
+    'creator'      : "http://viaf.org/viaf/50334488",
+    'type'         : "http://purl.org/dc/dcmitype/Software",
+    'language'     : "Python 3.7",
+    'created'      : "2015-08-31",
+    'modified'     : "2020-01-15",
+    'publisher'    : "http://github.com/sderose",
+    'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
+}
+__version__ = __metadata__['modified']
 
-
-###############################################################################
-# Process options
-#
-parser = argparse.ArgumentParser(
-    description="""
-
-=pod
-
-=head1 Usage
+descr = """
+=Usage=
 
 uncolorize [options]
 
+Remove ANSI terminal color escape codes from the input.
 
-=head1 Options
+For information on these codes, see for example
+[https://en.wikipedia.org/wiki/ANSI_escape_code].
 
-=over
+=Options=
 
-=item * B<--iencoding> I<e>
-
+* B<--iencoding> I<e>
 Assume this character set for input files.
 
-=item * B<-v> OR B<--verbose>
-
+* B<-v> OR B<--verbose>
 Add more detailed messages (repeatable).
 
-=item * B<--version>
-
+* B<--version>
 Display version info and exit.
-
-=back
-
 
 =head Related Commands
 
+`sjdUtils.py`, `ColorManager.pt`, and `sjdUtils.pm` also
+provide the `uncolorize` function.
 
-=head1 Known bugs and limitations
+=Known bugs and limitations=
 
 C<hilite> can apply color(s) to matched lines or expressions.
 
 C<colorstring> provide information about ANSI terminal escape sequences for color,
 and can set up C<lscolors> for bash.
 
+=To do=
 
-=head1 Ownership
+Generalize definition (at least at option) to remove all ANSI terminal escapes.
+
+The common case (including the color escapes) is a complete "code",
+namely the "Control Sequence Introducer":
+
+    ESC [ [0–9:;<=>?]* [- !"#$%&'()*+,./]* [@A–Z[\]^_`a–z{|}~]
+           x30-x3f      x20-x2f            x40–x7E
+           parameter    intermediate       final
+
+However, in practice the parameter group is almost always
+a list of semicolor-separated numbers.
+
+Sequences containing the parameter bytes [<=>?] or the final bytes x70–x7E [p–z{|}~] are private.
+
+=History=
+
+* 2015-08-31 Written by Steven J. DeRose.
+* 2015-09-17
+* 2020-03-04: Layout, POD to MarkDown, lint.
+
+=Rights=
 
 This work by Steven J. DeRose is licensed under a Creative Commons
 Attribution-Share Alike 3.0 Unported License. For further information on
@@ -76,12 +90,14 @@ The author's present email is sderose at acm.org.
 
 For the most recent version, see L<http://www.derose.net/steve/utilities/>.
 
-=head1 Options
+=Options=
+"""
 
-=cut
-    """,
-    formatter_class=MarkupHelpFormatter
-)
+###############################################################################
+# Process options
+#
+parser = argparse.ArgumentParser(
+    description=descr, formatter_class=MarkupHelpFormatter)
 parser.add_argument(
     "--iencoding",        type=str, metavar='E', default="utf-8",
     help='Assume this character set for input files.')
@@ -100,14 +116,12 @@ parser.add_argument(
     nargs=argparse.REMAINDER,
     help='Path(s) to input file(s)')
 
-global args, su
-#lg = ALogger()
 args = parser.parse_args()
+
 su = sjdUtils()
 su.setVerbose(args.verbose)
 
 
-###############################################################################
 ###############################################################################
 #
 def doOneFile(fh):
@@ -121,21 +135,20 @@ def doOneFile(fh):
     return(recnum)
 
 
-
 ###############################################################################
 ###############################################################################
 # Main
 #
 if (len(args.files) == 0):
-    fh = sys.stdin
+    fh0 = sys.stdin
 else:
     for fnum in (range(len(args.files))):
         f = args.files[fnum]
         if (os.path.isfile(f)):
-            fh = codecs.open(f, mode="r", encoding=args.iencoding)
-            doOneFile(fh)
-            fh.close()
+            fh0 = codecs.open(f, mode="r", encoding=args.iencoding)
+            doOneFile(fh0)
+            fh0.close()
         else:
-            lg.vMsg(0,"Can't find file '" + f + "'.")
+            sys.stderr.write("Can't find file '%s'.\n" % (f))
 
 sys.exit(0)
