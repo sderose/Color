@@ -3,10 +3,6 @@
 # 2018-08-29: Converted by perl2python, by Steven J. DeRose.
 # Original Perl version written <2006-10-04, by Steven J. DeRose.
 #
-# Usage examples:
-#    PS1=`colorstring -ps Cyan` Hello, `colorstring -ps green`"world ==>"
-#    colorstring --list
-#
 from __future__ import print_function
 import sys, os, re
 import argparse
@@ -26,13 +22,11 @@ __metadata__ = {
     'type'         : "http://purl.org/dc/dcmitype/Software",
     'language'     : "Python 3.7",
     'created'      : "2018-08-29",
-    'modified'     : "2020-08-19",
+    'modified'     : "2020-10-02",
     'publisher'    : "http://github.com/sderose",
     'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
 __version__ = __metadata__['modified']
-
-__version__ = "2020-08-19"
 
 descr = """
 =Usage=
@@ -41,6 +35,10 @@ colorstring [options] colorname [text]
 
 Return the escape sequence to switch an ANSI terminal to a given color,
 or turn stdin to that color.
+
+Usage examples:
+    PS1=`colorstring -ps Cyan` Hello, `colorstring -ps green`"world ==>"
+    colorstring --list
 
 Colors are specified as a named
 foreground color, background color, and/or text effect, such as
@@ -61,17 +59,17 @@ This script can also:
 (`--lscolorset`, `--lsget`, `--lslist`, and `--lsset`). Some of these
 require the (usually Linux) command 'dircolors'.
 
+==Color names used==
+
+The color names available are defined in F<bingit/SHELL/colorNames.md>,
+which supercedes anything in specific scripts (they `should` match).
+
 ==Color with emacs==
 
 To get `emacs` (such as with `M-x shell') to handle color escapes, add
 to your F<.emacs> or other init file:
 
     (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-==Color names used==
-
-The color names available are defined in F<bingit/SHELL/colorNames.md>,
-which supercedes anything in specific scripts (they `should` match).
 
 
 =Options=
@@ -169,7 +167,8 @@ The caller should store this in environment variable `LS_COLORS`), e.g.:
 
 Not yet as thoroughly tested as the Perl predecessor.
 
-You can't set more than one of blink, bold, inverse, hidden, and ul at once.
+You can't set more than one effect (such as blink, bold, inverse, hidden,
+and underline) at once.
 
 The color-name lookup used with the `--lslist` option can't handle
 simultaneous property, foreground, and background settings unless the
@@ -179,7 +178,7 @@ For now, such unmatched entries print the color name as '?'.
 
 `TERM=xterm-256color' is not supported except for `--list` via `--xterm256`.
 
-Does not have a way to avoid low-contrast pairs, particularly
+Does not have avoid low-contrast pairs, particularly
 in relation to the default terminal background color (which is hard to
 determine in the first place, though see the `xtermcontrol`, `tput`,
 and my `getBGColor` command.
@@ -245,7 +244,7 @@ replaced by an X11 colorspec, e.g., rgb:0000/0000/0000 for black.
 
 =References=
 
-L<http://http://push.cx/2008/256-color-xterms-in-ubuntu>
+[http://http://push.cx/2008/256-color-xterms-in-ubuntu]
 
 
 =History=
@@ -269,13 +268,14 @@ Debug new (hashless) way of doing colors.
 * ''2018-08-29: Port to Python.'' Math alphabet stuff to `mathAlphanumerics.py`.
 Switch to depend on ColorManager.py. Reconcile names, no more `fg_` and `bg_`.
 * 2018-10-22: Fix minor bugs. Refactor. Add `args.txt`, use `ColorManager` more.
+* 2020-10-02: Move effects to end to sync with `colorNames.md`.
 
 
 =To do=
 
 * Make it just issue the command-line args if present.
 * Add alternate setup to tag stuff with HTML instead.
-* Consider calling mappings from `mathAlphanumerics.py`.
+* Consider integrating with mappings from `mathAlphanumerics.py`.
 * Offer alternate color sets for `setenv` for light vs. dark backgrounds.
 * `lsset` should support replacing all mappings for a given color.
 * Use `rgb.txt` with xterm-256color to pick by name?
@@ -393,7 +393,8 @@ def setupDircolors():
     try:
         lsColors =  re.split(r':', check_output('dircolors'))
     except Exception as e:
-        sys.stderr.write("'dircolors' failed. Only available on Linux.")
+        sys.stderr.write(
+            "'dircolors' failed. Only available on Linux:\n    %s" % (e))
 
     lsColors[0] = re.sub(r'LS_COLORS=', '', lsColors[0])
     lsColors.pop()  # "export LS_COLORS"
@@ -486,14 +487,12 @@ See also `--breakLines`, `--list`, `--sampleText`, `-v`, and `--xterm256`""")
     return(args0)
 
 
-
-###############################################################################
 ###############################################################################
 # For '--xterm56' (unfinished):
 #     FG codes: '\e38;5;nm' for `n` from 0 to at least 255.
 #     BG codes: '\e48;5;nm'.
 #
-def showTable(bold=False):
+def showTable():
     rowHeadWidth = 12
     slen = len(args.sampleText)
     for effect in range(0,2):
@@ -513,7 +512,7 @@ def showTable(bold=False):
             buf = "%2d: %-12s" % (fgnum, fgname)
             #if (effect and effect!='Plain'): fullName = effect + "/" + fgname
             #else: fullName = fgname
-            for bgname, bgnum in (atomicColors.items()):
+            for bgname in (atomicColors.keys()):
                 buf += colorizeString(args.sampleText, fgname, bgname) + " "
             print(buf)
     return
@@ -629,26 +628,26 @@ def colorizeStdin():
     clist = []
     for colorName in (args.colors):
         if (colorName == "usa"):
-            clist.append(cseq("bold/red"))
-            clist.append(cseq("bold/default"))
-            clist.append(cseq("bold/blue"))
+            clist.append(cseq("red/bold"))
+            clist.append(cseq("white/bold"))
+            clist.append(cseq("blue/bold"))
 
         elif (colorName == "christmas"):
-            clist.append(cseq("bold/red"))
-            clist.append(cseq("bold/green"))
+            clist.append(cseq("red/bold"))
+            clist.append(cseq("green/bold"))
 
         elif (colorName == "italy"):
-            clist.append(cseq("bold/red"))
-            clist.append(cseq("bold/green"))
-            clist.append(cseq("bold/default"))
+            clist.append(cseq("red/bold"))
+            clist.append(cseq("green/bold"))
+            clist.append(cseq("white/bold"))
 
         elif (colorName == "rainbow"):
-            clist.append(cseq("bold/red"))
+            clist.append(cseq("red/bold"))
             clist.append(cseq("red"))
-            clist.append(cseq("bold/yellow"))
-            clist.append(cseq("bold/green"))
-            clist.append(cseq("bold/blue"))
-            clist.append(cseq("bold/magenta"))
+            clist.append(cseq("yellow/bold"))
+            clist.append(cseq("green/bold"))
+            clist.append(cseq("blue/bold"))
+            clist.append(cseq("magenta/bold"))
             clist.append(cseq("magenta"))
 
         else:
@@ -671,7 +670,6 @@ def colorizeStdin():
         if (n >= len(clist)):
             n = 0
     return
-
 
 def outConvert(s):
     """Convert to the desired output syntax.
@@ -727,7 +725,7 @@ def outConvert(s):
 
 
 ###############################################################################
-# MAIN
+# Main
 #
 args = processOptions()
 color0 = args.colors[0]

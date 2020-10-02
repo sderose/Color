@@ -3,29 +3,26 @@
 =The ColorManager package color names=
 
 The ColorManager package supplies ANSI terminal color services
-to other code. It should be fully integrated into these commands:
+to other code. This file describe the naming conventions it uses.
 
-* sjdUtils.pm, via its I<ColorManager> class
-
-* sjdUtils.py, via its I<ColorManager> class
-
-* alogging.py, when owned by an sjdUtils.py instance
-
-* colorstring (Perl) -- not yet fully integrated.
-
-* hilite (Perl), could better be called 'colorize'
-
-* colorizeExpr (Perl), via sjdUtils.pm
-
-* uncolorize (Python), via sjdUtils.py
-
-* show256Colors (?), not yet integrated
+It is used by many of my utilities in both Perl and Python.
+For example: sjdUtils.pm, sjdUtils.py, alogging.py, colorstring, hilite,
+colorizeExpr, uncolorize, etc.).
 
 
 ==Color naming conventions==
 
 The color names available are defined here.
 This supercedes anything in specific scripts (they I<should> match).
+
+The basic form of a "color name" is:
+
+    foreground/background/effect1/effect2...
+
+A name can stop after any number of the /-separated parts. For example,
+'red' and 'blue/yellow' are fine. At present, my ColorManager packages
+only support a single effect at a time.
+
 
 ===Basic colors===
 
@@ -41,7 +38,6 @@ The known basic color names are the usual ANSI terminal colors:
     "white"   : 7
     "default" : 9
 
-"off" is a synonym for "black".
 
 ===Basic effects===
 
@@ -61,13 +57,12 @@ The known effect names are:
 "blink" and "fblink" are suppressed if the environment variable B<NOBLINK>
 is set.
 
-Ideally, each effect can be turned on and off separately (so that any
-combination would be possible). To turn an effect on, use the name as listed;
+Ideally, each effect could be turned on and off separately (so that any
+combination would be possible), but for the moment only one effect is
+supported at a time. To turn an effect on, use the name as listed;
 to turn it off, use the name prefixed by "!", for example "!bold" to turn
 off bold.
-However, terminal program support for turning effects off seems inconsistent.
-
-The "bold" effect usually appears as a much brighter version of the color,
+"bold" usually appears as a much brighter version of the color,
 so is often used as if it provides additional colors.
 
 Not all terminal programs support all effects (see section below).
@@ -81,7 +76,7 @@ You can check your terminal program color support with:
 A complete color name consists of:
     a foreground color F,
     a background color B, and
-    an effect E (possibly with leading "!" to negate it)
+    an effect(s) E (possibly with leading "!" to negate it)
 
 These are separated by "/". If leading components are omitted, their
 following slash must still be present (so one can tell the difference
@@ -98,39 +93,6 @@ and background colors the same is available, though unreadable.
 Multiple simultaneous effects are not yet available; but if/when they are,
 the additional effects will be expressed by subsequent "/"-separated tokens.
 
-
-==Name patterns and combinations==
-
-For any foreground basic color name F,
-background basic color name B (from the color list), and
-any effect name E (including any "!"-negated effect name),
-these combination names are supported:
-
-    F          -- foreground color (code +30)
-    /B         -- background color (code +40)
-    F/B        -- foreground F over background B
-    E          -- effect E (code to turn on, +20 to turn back off)
-    E/F        -- foreground F with effect E (use E = "bold" for bright colors)
-    E//B       -- background B with effect E
-    E/F/B      -- foreground F with effect E over background B
-
-So, for example, these are valid color names:
-
-    red
-    magenta/yellow
-    bold/green/yellow
-    green/green
-    green/blink
-    /red/blink
-    /off/black/plain
-
-There are about 1000 combinations, though support for effects and
-combinations varies wildly by terminal type.
-
-B<Note>: Not all effects are supported on all terminals and terminal programs.
-Most support fg and bg colors plus bold, reverse, and perhaps underline.
-Some support more than 16 colors, but there is no support for that here yet.
-
 See my C<colorstring> command for some additional information; you can also
 check the behavior of your terminal or terminal program with:
 
@@ -140,24 +102,7 @@ You can tell C<ColorManager> to include I<only> certain effects, by passing a
 list of the desired effect name in the I<effects> parameter to the constructor.
 
 
-F, G, and/or E can be combined in these ways:
-
-* F -- foreground color F
-
-* /B -- background color B
-
-* F/B -- foreground color F with background color B
-
-* E -- effect E
-
-* E/F -- effect E with foreground color F (for example, I<bold/red>)
-
-* E/F/B -- effect E with foreground color F and background color B
-
-* E//B -- effect E with background color B
-
-
-==Support in some common terminal programs:==
+==Effect support in some common terminal programs:==
 
 * B<Terminal> (Mac OS X):  blink, bold, faint, inverse, invisible, ul
 (not fblink, italic, or strike).
@@ -184,7 +129,7 @@ You can use C<colorstring> with the I<--effects> or I<--list> options
 to check support by displaying samples.
 
 I<--xterm256> is not yet supported. That, and/or color names from
-the X F<rgb.txt> file may be supported in the future.
+the X F<rgb.txt> file, may be supported in the future.
 
 
 ==The ANSI terminal escapes==
