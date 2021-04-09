@@ -1,125 +1,103 @@
 #!/usr/bin/env python
 #
-# uncolorize: Remove ANSI terminal color escape sequences.
-# 2015-08-31; Written by Steven J. DeRose.
+# uncolorize: Remove ANSI terminal color escape sequences, fake bold, etc.
+# 2015-08-31: Written by Steven J. DeRose.
 #
 from __future__ import print_function
 import sys
 import os
+import re
 import argparse
 import codecs
 
-from sjdUtils import sjdUtils
-from MarkupHelpFormatter import MarkupHelpFormatter
+from ColorManager import ColorManager
 
 __metadata__ = {
     'title'        : "uncolorize",
+    'description'  : "Remove or translate ANSI terminal color, etc.",
     'rightsHolder' : "Steven J. DeRose",
     'creator'      : "http://viaf.org/viaf/50334488",
     'type'         : "http://purl.org/dc/dcmitype/Software",
     'language'     : "Python 3.7",
     'created'      : "2015-08-31",
-    'modified'     : "2020-01-15",
+    'modified'     : "2021-01-25",
     'publisher'    : "http://github.com/sderose",
     'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
 __version__ = __metadata__['modified']
 
+
 descr = """
 =Usage=
 
-uncolorize [options]
+    uncolorize [options] [files]
 
 Remove ANSI terminal color escape codes from the input.
+Can also remove `man`-style bold and underline (backspace+overstrike).
 
 For information on these codes, see for example
 [https://en.wikipedia.org/wiki/ANSI_escape_code].
 
-=Options=
 
-* B<--iencoding> I<e>
-Assume this character set for input files.
-
-* B<-v> OR B<--verbose>
-Add more detailed messages (repeatable).
-
-* B<--version>
-Display version info and exit.
-
-=head Related Commands
+=Related Commands=
 
 `sjdUtils.py`, `ColorManager.pt`, and `sjdUtils.pm` also
-provide the `uncolorize` function.
+provide `uncolorize` functionality.
+
+`hilite` can apply color(s) to matched lines or expressions.
+
+`colorstring` and `ColorManager.py` provide additional support for
+ANSI terminal color and effects escape sequences
+and can set up `lscolors` for bash.
+
 
 =Known bugs and limitations=
 
-C<hilite> can apply color(s) to matched lines or expressions.
+Can remove backspace-based boldface, but not convert it to HTML.
 
-C<colorstring> provide information about ANSI terminal escape sequences for color,
-and can set up C<lscolors> for bash.
+Assumes that an underscore comes ''before'' a backspace and character,
+not after. I don't know how reliable that assumption is. Also, if
+anyone still does letter+backspace+diacritic, the letter will be lost.
+
 
 =To do=
 
 Generalize definition (at least at option) to remove all ANSI terminal escapes.
-
-The common case (including the color escapes) is a complete "code",
-namely the "Control Sequence Introducer":
+A complete "code", namely the "Control Sequence Introducer", is:
 
     ESC [ [0–9:;<=>?]* [- !"#$%&'()*+,./]* [@A–Z[\]^_`a–z{|}~]
            x30-x3f      x20-x2f            x40–x7E
            parameter    intermediate       final
 
-However, in practice the parameter group is almost always
-a list of semicolor-separated numbers.
+In practice the parameter group is almost always
+a list of semicolon-separated numbers.
 
-Sequences containing the parameter bytes [<=>?] or the final bytes x70–x7E [p–z{|}~] are private.
+Sequences containing the parameter bytes `[<=>?]` or the final bytes x70–x7E `[p–z{|}~]` are private.
+
 
 =History=
 
 * 2015-08-31 Written by Steven J. DeRose.
 * 2015-09-17
 * 2020-03-04: Layout, POD to MarkDown, lint.
+* 2020-11-24: Support stdin, not just files. Use `ColorManager.py` directly.
+* 2020-12-14: Start `--oformat` option.
+* 2021-01-25: Add `--unman` to remove old-style boldface.
+
 
 =Rights=
 
 This work by Steven J. DeRose is licensed under a Creative Commons
 Attribution-Share Alike 3.0 Unported License. For further information on
-this license, see L<http://creativecommons.org/licenses/by-sa/3.0/>.
+this license, see [http://creativecommons.org/licenses/by-sa/3.0].
 
 The author's present email is sderose at acm.org.
 
-For the most recent version, see L<http://www.derose.net/steve/utilities/>.
+For the most recent version, see [http://www.derose.net/steve/utilities].
+
 
 =Options=
 """
-
-###############################################################################
-# Process options
-#
-parser = argparse.ArgumentParser(
-    description=descr, formatter_class=MarkupHelpFormatter)
-parser.add_argument(
-    "--iencoding",        type=str, metavar='E', default="utf-8",
-    help='Assume this character set for input files.')
-parser.add_argument(
-    "--unicode",          action='store_const',  dest='iencoding',
-    const='utf8', help='Assume utf-8 for input files.')
-parser.add_argument(
-    "--verbose", "-v",    action='count',       default=0,
-    help='Add more messages (repeatable).')
-parser.add_argument(
-    '--version',          action='version',     version='Version of '+__version__,
-    help='Display version information, then exit.')
-
-parser.add_argument(
-    'files',             type=str,
-    nargs=argparse.REMAINDER,
-    help='Path(s) to input file(s)')
-
-args = parser.parse_args()
-
-su = sjdUtils()
-su.setVerbose(args.verbose)
 
 
 ###############################################################################
@@ -131,24 +109,72 @@ def doOneFile(fh):
         rec = fh.readline()
         if (len(rec) == 0): break
         recnum += 1
-        print(su.uncolorize(rec), end='')
+        if (args.unman):
+            rec = re.sub(r".\x08", "", rec)
+        if (args.oformat == 'remove'):
+            print(cm.uncolorize(rec))
+        elif (args.oformat == 'html'):
+            print(cm.color2html(rec))
+        else:
+            raise KeyError("Unknown --oformat '%s'." % (args.oformat))
     return(recnum)
 
 
 ###############################################################################
-###############################################################################
 # Main
 #
-if (len(args.files) == 0):
-    fh0 = sys.stdin
-else:
-    for fnum in (range(len(args.files))):
-        f = args.files[fnum]
-        if (os.path.isfile(f)):
-            fh0 = codecs.open(f, mode="r", encoding=args.iencoding)
-            doOneFile(fh0)
-            fh0.close()
-        else:
-            sys.stderr.write("Can't find file '%s'.\n" % (f))
+if __name__ == "__main__":
+    import argparse
 
-sys.exit(0)
+    def processOptions():
+        try:
+            from BlockFormatter import BlockFormatter
+            parser = argparse.ArgumentParser(
+                description=descr, formatter_class=BlockFormatter)
+        except ImportError:
+            parser = argparse.ArgumentParser(description=descr)
+
+        parser.add_argument(
+            "--iencoding", type=str, metavar='E', default="utf-8",
+            help='Assume this character set for input files.')
+        parser.add_argument(
+            "--oformat", type=str, metavar='F', default="remove",
+            choices=[ 'remove', 'html' ],
+            help='Assume this character set for input files.')
+        parser.add_argument(
+            "--unicode", action='store_const', dest='iencoding',
+            const='utf8', help='Assume utf-8 for input files.')
+        parser.add_argument(
+            "--unman", action="store_true",
+            help="Remove `man`-style boldface.")
+        parser.add_argument(
+            "--verbose", "-v", action='count', default=0,
+            help='Add more messages (repeatable).')
+        parser.add_argument(
+            '--version', action='version', version='Version of '+__version__,
+            help='Display version information, then exit.')
+
+        parser.add_argument(
+            'files', type=str,
+            nargs=argparse.REMAINDER,
+            help='Path(s) to input file(s)')
+
+        args0 = parser.parse_args()
+        return args0
+
+
+    args = processOptions()
+    cm = ColorManager()
+
+    if (len(args.files) == 0):
+        fh0 = sys.stdin
+        doOneFile(fh0)
+    else:
+        for fnum in (range(len(args.files))):
+            f = args.files[fnum]
+            if (os.path.isfile(f)):
+                fh0 = codecs.open(f, mode="r", encoding=args.iencoding)
+                doOneFile(fh0)
+                fh0.close()
+            else:
+                sys.stderr.write("Can't find file '%s'.\n" % (f))

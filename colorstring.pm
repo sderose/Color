@@ -1,37 +1,7 @@
 #!/usr/bin/perl -w
 #
 # colorstring.pm: Support for ANSI terminal colors and effects.
-#
-# Usage examples:
-#    PS1=`colorstring -ps Cyan` Hello, `colorstring -ps green`"world ==>"
-#    colorstring --list
-#
-# Written <2006-10-04, Steven J. DeRose.
-# 2008-02-11 sjd: Add --perl, perl -w.
-# 2008-09-03 sjd: BSD. Improve doc, error-checking, fix bug in -all.
-# 2010-03-28 sjd: perldoc. Add \[\] to -ps.
-# 2010-09-20ff sjd: Cleanup. Add --color; ls and dircolors support. Simplify
-#     numeric handling of codes. Support color combinations. Add -setenv.
-#     Change 'fg2_' prefix to 'bold_' and factor out of code.
-# 2013-06-11: Add --xterm256, but just for --list.
-# 2013-06-27: Add --table. Ditch "fg2_" and "b_" prefixes.
-# 2014-07-09: Clean up doc. Add --python. Clean up --perl. fix --list.
-# 2015-02-04: Support rest of effects beyond bold.
-# 2015-08-25: Start syncing color-refs with sjdUtils.pm.
-# 2016-01-01: Get rid of extraneous final newline with -m.
-# 2016-07-21: Merge doc on color names w/ sjdUtils.p[my], etc.
-# 2016-10-25: Clean up to integrate w/ ColorManager. Change names.
-#     Debug new (hashless) way of doing colors.
-# ******* 2018-08-29: Ported also to Python.
-#
-# To do:
-#     Add alternate setup to tag stuff with HTML instead.
-#     Use the ColorManager class from sjdUtils.pl!
-#     Consider mappings to special Unicode alphabets (cf SimplifyUnicode,
-#         mathAlphanumerics.py, ord).
-#     Offer alternate color sets for setenv, for light vs. dark backgrounds.
-#     lsset should support replacing all mappings for a given color.
-#     Use rgb.txt with xterm-256color to pick by name?
+# 2006-10: Written by Steven J. DeRose.
 #
 use strict;
 use Getopt::Long;
@@ -41,19 +11,18 @@ use ColorManager;
 
 our %metadata = (
     'title'        => "colorstring.pm",
+    'description'  => "Support for ANSI terminal colors and effects.",
     'rightsHolder' => "Steven J. DeRose",
     'creator'      => "http://viaf.org/viaf/50334488",
     'type'         => "http://purl.org/dc/dcmitype/Software",
     'language'     => "Perl 5.18",
     'created'      => "2006-10",
-    'modified'     => "2020-01-15",
+    'modified'     => "2020-11-20",
     'publisher'    => "http://github.com/sderose",
     'license'      => "https://creativecommons.org/licenses/by-sa/3.0/"
 );
 our $VERSION_DATE = $metadata{'modified'};
 
-###############################################################################
-#
 
 =pod
 
@@ -62,11 +31,31 @@ our $VERSION_DATE = $metadata{'modified'};
 colorstring [options] colorname
 
 Returns the escape string needed to switch an ANSI terminal to a given
-foreground color, background color, and/or text effect.
-The strings can be gotten
-in various forms as needed for use in bash scripts, bash prompt-strings,
-Perl code, etc. (see options).
+foreground color, background color, and/or text effect, or displays something
+in a given color.
 
+The escape-strings can be gotten
+in various forms as needed for use in bash scripts, bash prompt-strings,
+Perl code, etc. (see options). For example:
+
+    PS1=`colorstring -ps Cyan` "Hello"
+
+This encloses the string (in this case "Hello") with the necessary stuff to
+display it in Cyan (on the default background color).
+I<-ps> instructs the script to format as needed to embed in
+a bash prompt string (that affects how the escape character is expressed).
+
+    colorstring -m green "Happy birthday"
+
+You can also get color information, for example:
+
+    colorstring --list
+
+shows a table of available foreground and background colors and effects.
+The naming conventions this package uses, are described in F<colorNames.md>.
+
+# Usage examples:
+#
 This script can also:
 
 =over
@@ -219,11 +208,11 @@ The caller should store this in environment variable C<LS_COLORS>), e.g.:
 
     export LS_COLORS=`colorstring --lsset di red`
 
-=item * B<-m> I<msg>
+=item * B<-m> I<msg> OR B<--msg> OR C<--message>
 
 Send I<msg> to stdout in the specified color.
 
-=item * B<-w> I<msg>
+=item * B<-w> I<msg> OR B<--warn>
 
 Send I<msg> to stderr in the specified color.
 
@@ -371,19 +360,86 @@ replaced by an X11 colorspec, e.g., rgb:0000/0000/0000 for black.
 L<http://http://push.cx/2008/256-color-xterms-in-ubuntu>
 
 
-=head1 Ownership
+=head1 History
 
-This work by Steven J. DeRose is licensed under a Creative Commons
-Attribution-Share Alike 3.0 Unported License. For further information on
-this license, see L<http://creativecommons.org/licenses/by-sa/3.0/>.
+  Written <2006-10-04, Steven J. DeRose.
+  2008-02-11 sjd: Add --perl, perl -w.
+  2008-09-03 sjd: BSD. Improve doc, error-checking, fix bug in -all.
+  2010-03-28 sjd: perldoc. Add \[\] to -ps.
+  2010-09-20ff sjd: Cleanup. Add --color; ls and dircolors support. Simplify
+numeric handling of codes. Support color combinations. Add -setenv.
+Change 'fg2_' prefix to 'bold_' and factor out of code.
+  2013-06-11: Add --xterm256, but just for --list.
+  2013-06-27: Add --table. Ditch "fg2_" and "b_" prefixes.
+  2014-07-09: Clean up doc. Add --python. Clean up --perl. fix --list.
+  2015-02-04: Support rest of effects beyond bold.
+  2015-08-25: Start syncing color-refs with sjdUtils.pm.
+  2016-01-01: Get rid of extraneous final newline with -m.
+  2016-07-21: Merge doc on color names w/ sjdUtils.p[my], etc.
+  2016-10-25: Clean up to integrate w/ ColorManager. Change names.
+Debug new (hashless) way of doing colors.
+  2018-08-29: Ported to Python. *******
+  2020-11-20: New layout.
 
-For the most recent version, see L<http://www.derose.net/steve/utilities/>
-or L<https://github.com/sderose>.
+
+=head1 To do
+
+  Use the ColorManager.pm class!
+    Update internals to use right naming conventions (a la colorNames.md), and
+to not make a big unnecessary hash of all the possibilities.
+  Add alternate setup to tag stuff with HTML instead.
+  Offer alternate color sets for setenv, for light vs. dark backgrounds.
+  lsset should support replacing all mappings for a given color.
+
+
+=head1 Rights
+
+Copyright 2006-10-04, 2018-08-29 by Steven J. DeRose.
+This work is licensed under a
+Creative Commons Attribution-Share Alike 3.0 Unported License.
+For further information on this license, see
+L<https://creativecommons.org/licenses/by-sa/3.0>.
+
+For the most recent version, see L<http://www.derose.net/steve/utilities> or
+L<https://github.com/sderose>.
+
 
 =cut
 
 
 ###############################################################################
+# Data
+#
+# Define explanations for the non-file-glob cases used by LS_COLORS.
+#
+my %lsSpecials = (
+    "bd" => "BLK                    Block device driver",
+    "ca" => "CAPABILITY             File with capability",
+    "cd" => "CHR                    Character device driver",
+    "di" => "DIR                    Directories",
+    "do" => "DOOR                   Door (eh?)",
+    "ex" => "EXEC                   Executable files",
+    "??" => "FILE                   Other file (normally not set)",
+    "hl" => "HARDLINK               Hard link",
+    "ln" => "LINK                   Symbolic link (can use 'target' color)",
+    "or" => "ORPHAN                 Broken symbolic link, etc.",
+    "ow" => "OTHER_WRITABLE         Other-writable, non-sticky file",
+    "pi" => "FIFO                   Pipe",
+    "rs" => "RESET                  Reset to default color",
+    "sg" => "SETGID                 SetGID",
+    "so" => "SOCK                   Socket?",
+    "st" => "STICKY                 Directory with sticky bit set (+t)",
+    "su" => "SETUID                 SetUID",
+    "tw" => "STICKY_OTHER_WRITABLE  Sticky other writable file",
+    );
+
+my @atomicColors = ();   # Table of basic color names.
+my %effectsOn = ();      # Table of special effects (bold, etc)
+my %colorTable = ();     # Map from named colors to codes.
+
+
+###############################################################################
+# Options
 #
 my $all        = 0;
 my $break      = 0;
@@ -408,64 +464,13 @@ my $verbose    = 0;
 my $warnmsg    = "";
 my $xterm256   = 0;
 
-# Define explanations for the non-file-glob cases used by LS_COLORS.
-#
-my %lsSpecials = (
-    "bd" => "BLK                    Block device driver",
-    "ca" => "CAPABILITY             File with capability",
-    "cd" => "CHR                    Character device driver",
-    "di" => "DIR                    Directories",
-    "do" => "DOOR                   Door (eh?)",
-    "ex" => "EXEC                   Executable files",
-    "??" => "FILE                   Other file (normally not set)",
-    "hl" => "HARDLINK               Hard link",
-    "ln" => "LINK                   Symbolic link (can use 'target' color)",
-    "or" => "ORPHAN                 Broken symbolic link, etc.",
-    "ow" => "OTHER_WRITABLE         Other-writable, non-sticky file",
-    "pi" => "FIFO                   Pipe",
-    "rs" => "RESET                  Reset to default color",
-    "sg" => "SETGID                 SetGID",
-    "so" => "SOCK                   Socket?",
-    "st" => "STICKY                 Directory with sticky bit set (+t)",
-    "su" => "SETUID                 SetUID",
-    "tw" => "STICKY_OTHER_WRITABLE  Sticky other writable file",
-    );
-
 my $boldToken    = "bold";       # FIX
 my $blinkToken   = "blink";
 my $inverseToken = "inverse";
 my $ulToken      = "ul";
 my $esc = chr(27);
 
-my @atomicColors = ();   # Table of basic color names.
-my %effectsOn = ();      # Table of special effects (bold, etc)
 
-my %colorTable = ();     # Map from named colors to codes.
-
-# Names of the Unicode Planes.
-my @uPlanes = ();
-$uPlanes[ 0] = [ "Basic Multilingual",                "Prime Material" ];
-$uPlanes[ 1] = [ "Supplementary Multilingual",        "Celestia" ];
-$uPlanes[ 2] = [ "Supplementary Ideographic",         "Bytopia" ];
-$uPlanes[ 3] = [ "Unassigned 3",                      "Elysium" ];
-$uPlanes[ 4] = [ "Unassigned 4",                      "Beastlands" ];
-$uPlanes[ 5] = [ "Unassigned 5",                      "Arborea" ];
-$uPlanes[ 6] = [ "Unassigned 6",                      "Ysgard" ];
-$uPlanes[ 7] = [ "Unassigned 7",                      "Limbo" ];
-$uPlanes[ 8] = [ "Unassigned 8",                      "Pandemonium" ];
-$uPlanes[ 9] = [ "Unassigned 9",                      "Abyss" ];
-$uPlanes[10] = [ "Unassigned 10",                     "Carceri" ];
-$uPlanes[11] = [ "Unassigned 11",                     "Hades" ];
-$uPlanes[12] = [ "Unassigned 12",                     "Gehenna" ];
-$uPlanes[13] = [ "Unassigned 13",                     "Baator" ];
-$uPlanes[14] = [ "Supplementary Special-purpose",     "Acheron" ];
-$uPlanes[15] = [ "Supplementary Private Use Area A",  "Mechanus" ];
-$uPlanes[16] = [ "Supplementary Private Use Area B",  "Arcadia" ];
-
-
-###############################################################################
-# Process options
-#
 my %getoptHash = (
     "all"               => \$all,
     "break!"            => \$break,
@@ -483,9 +488,9 @@ my %getoptHash = (
     "lsget=s"           => \$lsget,
     "lslist!"           => \$lslist,
     "lsset=s"           => \$lsset,
-    "m=s"               => \$message,
-	"perl!"             => \$perl,
-	"python!"           => \$python,
+    "m|message|msg=s"   => \$message,
+    "perl!"             => \$perl,
+    "python!"           => \$python,
     "print"             => \$print,
     "ps|bash"           => \$ps,
     "q|quiet!"          => \$quiet,
@@ -496,11 +501,13 @@ my %getoptHash = (
     "version"           => sub {
         die "Version of $VERSION_DATE, by Steven J. DeRose.\n";
     },
-    "w=s"               => \$warnmsg,
+    "w|warn=s"          => \$warnmsg,
     "xterm256!"         => \$xterm256,
     );
 Getopt::Long::Configure ("ignore_case");
 my $result = GetOptions(%getoptHash) || die "Bad options.\n";
+
+warn "Remaining args after getopt: " . join(", ", @ARGV) . ".\n";
 
 my $con = my $coff = "";
 if ($color) {
@@ -563,14 +570,14 @@ if ($table) {
 #
 if ($list) {
     my %map = (
-        "black"	    => "blk",
-        "red"	    => "red",
-        "green"	    => "grn",
-        "yellow"	=> "yel",
-        "blue"	    => "blu",
-        "magenta"	=> "mag",
-        "cyan"  	=> "cyn",
-        "white"	    => "wht",
+        "black"     => "blk",
+        "red"       => "red",
+        "green"     => "grn",
+        "yellow"    => "yel",
+        "blue"      => "blu",
+        "magenta"   => "mag",
+        "cyan"      => "cyn",
+        "white"     => "wht",
     );
     my @effects = sort keys %effectsOn;
     for (my $e=0; $e<scalar(@effects); $e++) {
@@ -678,33 +685,33 @@ if ($all) {
     while ($ARGV[0]) {
         my $colorName = shift;
         if ($colorName eq "usa")  {
-            push(@clist, $colorTable{"_red"	. $boldToken});
-            push(@clist, $colorTable{"_default"	. $boldToken});
-            push(@clist, $colorTable{"_blue"	. $boldToken});
+            push(@clist, $colorTable{"_red" . $boldToken});
+            push(@clist, $colorTable{"_default" . $boldToken});
+            push(@clist, $colorTable{"_blue"    . $boldToken});
         }
         elsif ($colorName eq "christmas")  {
-            push(@clist, $colorTable{"_red"	. $boldToken});
-            push(@clist, $colorTable{"_green"	. $boldToken});
+            push(@clist, $colorTable{"_red" . $boldToken});
+            push(@clist, $colorTable{"_green"   . $boldToken});
         }
         elsif ($colorName eq "italy")  {
-            push(@clist, $colorTable{"_red"	. $boldToken});
-            push(@clist, $colorTable{"_green"	. $boldToken});
-            push(@clist, $colorTable{"_default"	. $boldToken});
+            push(@clist, $colorTable{"_red" . $boldToken});
+            push(@clist, $colorTable{"_green"   . $boldToken});
+            push(@clist, $colorTable{"_default" . $boldToken});
         }
         elsif ($colorName eq "rainbow")  {
-            push(@clist, $colorTable{"_red"	. $boldToken});
+            push(@clist, $colorTable{"_red" . $boldToken});
             push(@clist, $colorTable{"fg_red"});
-            push(@clist, $colorTable{"_yellow"	. $boldToken});
-            push(@clist, $colorTable{"_green"	. $boldToken});
-            push(@clist, $colorTable{"_blue"	. $boldToken});
-            push(@clist, $colorTable{"_magenta"	. $boldToken});
+            push(@clist, $colorTable{"_yellow"  . $boldToken});
+            push(@clist, $colorTable{"_green"   . $boldToken});
+            push(@clist, $colorTable{"_blue"    . $boldToken});
+            push(@clist, $colorTable{"_magenta" . $boldToken});
             push(@clist, $colorTable{"fg_magenta"});
         }
         else {
             my $seq = $colorTable{$colorName};
-            if (!$seq) { $seq = $colorTable{"_$colorName"	. $boldToken}; }
+            if (!$seq) { $seq = $colorTable{"_$colorName"   . $boldToken}; }
             if (!$seq) {
-            	die "colorstring: Unknown color '$colorName'.\n";
+                die "colorstring: Unknown color '$colorName'.\n";
             }
             push(@clist, $seq);
         }
@@ -730,7 +737,7 @@ if ($all) {
 my $colorName = lc(shift);
 my $escString = $colorTable{$colorName};
 if (!$escString) {
-    $escString = $colorTable{"_$colorName"	. $boldToken};
+    $escString = $colorTable{"_$colorName"  . $boldToken};
 }
 ($escString) ||
     die "colorstring: Unknown color key '$colorName'. Use -h for help.\n";
@@ -792,7 +799,6 @@ exit;
 
 
 ###############################################################################
-###############################################################################
 #
 sub colorizeString {
     my ($msg, $fg, $bg) = @_;
@@ -805,7 +811,6 @@ sub colorizeString {
     my $buf =  "\e" . $c . $msg . $coff;
     return($buf);
 }
-
 
 
 ###############################################################################
@@ -864,7 +869,7 @@ sub setupColors {
     $colorTable{"off"}         = "[m";
     $colorTable{"fg_default"}  = "[39m";
     $colorTable{"/default"}  = "[49m";
-    $colorTable{"_default"} = "[39m"	. $boldToken;
+    $colorTable{"_default"} = "[39m"    . $boldToken;
 
     # Make up the full tables of all known color names, combos, whatever.
     # NOTE: The leading escape is not included here.

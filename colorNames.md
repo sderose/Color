@@ -130,6 +130,7 @@ to check support by displaying samples.
 
 I<--xterm256> is not yet supported. That, and/or color names from
 the X F<rgb.txt> file, may be supported in the future.
+See https://unix.stackexchange.com/questions/124407/ for details.
 
 
 ==The ANSI terminal escapes==

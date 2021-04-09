@@ -1,60 +1,38 @@
 #!/usr/bin/env python
 #
-# colorConvert.py
-#
+# colorConvert.py: Normalize various color specs.
 # 2016-04-14: Written. Copyright by Steven J. DeRose.
-# 2018-04-18: lint.
-#
-# Creative Commons Attribution-Share-alike 3.0 unported license.
-# See http://creativecommons.org/licenses/by-sa/3.0/.
-#
-# To do:
 #
 from __future__ import print_function
 import sys, os, argparse
 import re
 import math
-#import string
-#import math
-#import subprocess
 import codecs
 import colorsys
 import webcolors
 
-#import pudb
-#pudb.set_trace()
-
-#from sjdUtils import sjdUtils
 from alogging import ALogger
 from MarkupHelpFormatter import MarkupHelpFormatter
 
 lg = ALogger(1)
 palColors = {}
 
-__version__ = "2018-04-18"
 __metadata__ = {
-    'creator'      : "Steven J. DeRose",
-    'cre_date'     : "2016-04-14",
-    'language'     : "Python 2.7.6",
-    'version_date' : "2016-04-14",
+    "title"        : "colorConvert.py",
+    "description"  : "Normalize various color specs.",
+    "rightsHolder" : "Steven J. DeRose",
+    "creator"      : "http://viaf.org/viaf/50334488",
+    "type"         : "http://purl.org/dc/dcmitype/Software",
+    "language"     : "Python 3.7",
+    "created"      : "2016-04-14",
+    "modified"     : "2021-03-03",
+    "publisher"    : "http://github.com/sderose",
+    "license"      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
+__version__ = __metadata__["modified"]
 
-knownSchemes = [ 'rgb', 'rgba', 'hsv', 'hsva', 'yiq', 'hls' ]
-token = r'\s*([\da-fA-F.]+%?)'
-try:
-    fe = r'(\w+)\(%s,%s,%s(,%s)?\)' % (token,token,token,token)
-    print("Expr: /%s/'" % (fe))
-    functionExpr = re.compile(fe)
-except Exception as e:
-    print("Bad regex: '%s'.\n    %s" % (fe, e))
-    sys.exit()
 
-###############################################################################
-#
-def processOptions():
-    parser = argparse.ArgumentParser(
-        description="""
-
+descr="""
 =head1 Description
 
 Normalize colors to a given form from a variety of other forms.
@@ -81,6 +59,7 @@ Arguments to the function-style forms may be specified as any of:
 B<Note>: If some input cannot be parsed,
 a I<ValueError> exception is raised.
 
+
 =head1 Related Commands
 
 Packages: colorsys, webcolors L<https://pypi.python.org/pypi/webcolors/1.3>
@@ -90,6 +69,7 @@ by L<https://pypi.python.org/pypi/pycolorname>
 
 C<python-colormath> supports many color spaces, but it's I<big>.
 See L<https://python-colormath.readthedocs.org/en/latest/>.
+
 
 =head1 Known bugs and limitations
 
@@ -109,16 +89,45 @@ L<http://www.w3.org/TR/css3-color/#SRGB>
 
 L<https://en.wikipedia.org/wiki/CMYK_color_model#Conversion>
 
-=head1 Licensing
+=History=
 
-Copyright 2015 by Steven J. DeRose. This script is licensed under a
+  2016-04-14: Written. Copyright by Steven J. DeRose.
+  2018-04-18: lint.
+  2020-03-03: New layout.
+
+
+=Rights=
+
+Copyright 2016-04-14 by Steven J. DeRose. This work is licensed under a
 Creative Commons Attribution-Share-alike 3.0 unported license.
-See http://creativecommons.org/licenses/by-sa/3.0/ for more information.
+For further information on this license, see
+[https://creativecommons.org/licenses/by-sa/3.0].
+
+For the most recent version, see [http://www.derose.net/steve/utilities]
+or [https://github.com/sderose].
+
 
 =head1 Options
-        """,
-        formatter_class=MarkupHelpFormatter
-    )
+"""
+
+
+knownSchemes = [ 'rgb', 'rgba', 'hsv', 'hsva', 'yiq', 'hls' ]
+token = r'\s*([\da-fA-F.]+%?)'
+try:
+    fe = r'(\w+)\(%s,%s,%s(,%s)?\)' % (token,token,token,token)
+    print("Expr: /%s/'" % (fe))
+    functionExpr = re.compile(fe)
+except Exception as e:
+    print("Bad regex: '%s'.\n    %s" % (fe, e))
+    sys.exit()
+
+
+###############################################################################
+#
+def processOptions():
+    parser = argparse.ArgumentParser(
+        description=descr, formatter_class=MarkupHelpFormatter)
+
     parser.add_argument(
         "--color",  # Don't default. See below.
         help='Colorize the output.')
@@ -311,7 +320,6 @@ def findNearestPalColor(rgb6):
 """
 
 
-###############################################################################
 ###############################################################################
 # Main
 #
