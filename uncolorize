@@ -7,7 +7,6 @@ from __future__ import print_function
 import sys
 import os
 import re
-import argparse
 import codecs
 
 from ColorManager import ColorManager
@@ -65,7 +64,7 @@ anyone still does letter+backspace+diacritic, the letter will be lost.
 Generalize definition (at least at option) to remove all ANSI terminal escapes.
 A complete "code", namely the "Control Sequence Introducer", is:
 
-    ESC [ [0–9:;<=>?]* [- !"#$%&'()*+,./]* [@A–Z[\]^_`a–z{|}~]
+    ESC [ [0–9:;<=>?]* [- !"#$%&'()*+,./]* [@A–Z[\\]^_`a–z{|}~]
            x30-x3f      x20-x2f            x40–x7E
            parameter    intermediate       final
 
@@ -114,7 +113,7 @@ def doOneFile(fh):
         if (args.oformat == 'remove'):
             print(cm.uncolorize(rec))
         elif (args.oformat == 'html'):
-            print(cm.color2html(rec))
+            print(cm.color2Html(rec))
         else:
             raise KeyError("Unknown --oformat '%s'." % (args.oformat))
     return(recnum)
