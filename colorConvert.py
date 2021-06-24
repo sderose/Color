@@ -25,7 +25,7 @@ __metadata__ = {
     "type"         : "http://purl.org/dc/dcmitype/Software",
     "language"     : "Python 3.7",
     "created"      : "2016-04-14",
-    "modified"     : "2021-03-03",
+    "modified"     : "2021-06-24",
     "publisher"    : "http://github.com/sderose",
     "license"      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
@@ -33,7 +33,9 @@ __version__ = __metadata__["modified"]
 
 
 descr="""
-=head1 Description
+=Description=
+
+[not quite finished]
 
 Normalize colors to a given form from a variety of other forms.
 
@@ -56,22 +58,22 @@ Arguments to the function-style forms may be specified as any of:
     decimal non-integers from 0 to 255
     decimal numbers followed by a percent sign ("%")
 
-B<Note>: If some input cannot be parsed,
-a I<ValueError> exception is raised.
+'''Note''': If some input cannot be parsed,
+a ''ValueError'' exception is raised.
 
 
-=head1 Related Commands
+=Related Commands=
 
 Packages: colorsys, webcolors L<https://pypi.python.org/pypi/webcolors/1.3>
 
 Pantone conversion is said to be supported
-by L<https://pypi.python.org/pypi/pycolorname>
+by [https://pypi.python.org/pypi/pycolorname]
 
-C<python-colormath> supports many color spaces, but it's I<big>.
-See L<https://python-colormath.readthedocs.org/en/latest/>.
+`python-colormath` supports many color spaces, but it's ''big''.
+See ''https://python-colormath.readthedocs.org/en/latest/].
 
 
-=head1 Known bugs and limitations
+=Known bugs and limitations=
 
 Although the rgba() and hsva() forms are accepted, the alpha (transparency)
 component is discarded.
@@ -83,18 +85,19 @@ Conversion I<to> named HTML colors is not provided (yet).
 A feature to pick, for each input color, the nearest color from a given
 pal*[ae]t*e*, would be helpful.
 
-=head1 References
 
-L<http://www.w3.org/TR/css3-color/#SRGB>
+=References=
 
-L<https://en.wikipedia.org/wiki/CMYK_color_model#Conversion>
+[http://www.w3.org/TR/css3-color/#SRGB]
+
+[https://en.wikipedia.org/wiki/CMYK_color_model#Conversion]
 
 
 =History=
 
   2016-04-14: Written. Copyright by Steven J. DeRose.
   2018-04-18: lint.
-  2020-03-03: New layout.
+  2020-03-03, 2021-06-24: New layout.
 
 
 =Rights=
@@ -108,9 +111,8 @@ For the most recent version, see [http://www.derose.net/steve/utilities]
 or [https://github.com/sderose].
 
 
-=head1 Options
+=Options=
 """
-
 
 knownSchemes = [ 'rgb', 'rgba', 'hsv', 'hsva', 'yiq', 'hls' ]
 token = r'\s*([\da-fA-F.]+%?)'
@@ -209,9 +211,9 @@ def cconvert(s):
 
     return(rgbTriple)
 
-
-# Take various numeric forms, and return a float in 0..1
-def convertNumber(s):
+def convertNumber(s:str):
+    """Take various numeric forms, and return a float in 0..1.
+    """
     #print("converting: '%s'." % (s))
     try:
         if (s.endswith('%')):    return(float(s[0:-1])/100)
@@ -223,35 +225,36 @@ def convertNumber(s):
         print("Cannot parse number from '%s'.\n    %s" % (s, e))
         sys.exit()
 
-# Convert a tuple of floats to the chosen output format
 def serialize(rgb, fmt):
-    if (args.out == 'rgb3'):
+    """Convert a tuple of floats to the named output format.
+    """
+    if (fmt == 'rgb3'):
         return('#%01x%01x%01x' %
               (int(rgb[0]*15), int(rgb[1]*15), int(rgb[2]*15)))
-    elif (args.out == 'rgb6'):
+    elif (fmt == 'rgb6'):
         return('#%02x%02x%02x' %
               (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255)))
-    elif (args.out == 'rgb9'):
+    elif (fmt == 'rgb9'):
         return('#%03x%03x%03x' %
               (int(rgb[0]*4095), int(rgb[1]*4095), int(rgb[2]*4095)))
-    elif (args.out == 'rgdDec'):
+    elif (fmt == 'rgdDec'):
         return('rgb(%3d, %3d, %3d)' %
               (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255)))
-    elif (args.out == 'rgb%'):
+    elif (fmt == 'rgb%'):
         return('rgb(%5.1f%%, %5.1f%%, %5.1f%%)' %
               (rgb[0], rgb[1], rgb[2]))
 
-    elif (args.out == 'hsv'):
+    elif (fmt == 'hsv'):
         return('hsv(%5.3f%%, %5.3f%%, %5.3f%%)' %
               colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2]))
-    elif (args.out == 'hls'):
+    elif (fmt == 'hls'):
         return('hls(%5.1f%%, %5.1f%%, %5.1f%%)' %
               colorsys.rgb_to_hls(rgb[0], rgb[1], rgb[2]))
-    elif (args.out == 'yiq'):
+    elif (fmt == 'yiq'):
         return('yiq(%5.1f%%, %5.1f%%, %5.1f%%)' %
               colorsys.rgb_to_yiq(rgb[0], rgb[1], rgb[2]))
     else:
-        raise ValueError('Unknown output format "%s".' % (args.out))
+        raise ValueError('Unknown output format "%s".' % (fmt))
 
 
 def cdistance(rgb1, rgb2):

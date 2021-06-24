@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #
+# colorstring.py: Easy access to ANSI terminal color.
 # 2018-08-29: Converted by perl2python, by Steven J. DeRose.
 # Original Perl version written <2006-10-04, by Steven J. DeRose.
 #
@@ -17,6 +18,7 @@ args = None
 
 __metadata__ = {
     'title'        : "colorstring.py",
+    'description'  : "Easy access to ANSI terminal color.",
     'rightsHolder' : "Steven J. DeRose",
     'creator'      : "http://viaf.org/viaf/50334488",
     'type'         : "http://purl.org/dc/dcmitype/Software",
