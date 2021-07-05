@@ -12,8 +12,6 @@ import colorsys
 import webcolors
 
 from alogging import ALogger
-from MarkupHelpFormatter import MarkupHelpFormatter
-
 lg = ALogger(1)
 palColors = {}
 
@@ -125,8 +123,12 @@ except Exception as e:
 ###############################################################################
 #
 def processOptions():
-    parser = argparse.ArgumentParser(
-        description=descr, formatter_class=MarkupHelpFormatter)
+    try:
+        from BlockFormatter import BlockFormatter
+        parser = argparse.ArgumentParser(
+            description=descr, formatter_class=BlockFormatter)
+    except ImportError:
+        parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument(
         "--color",  # Don't default. See below.
