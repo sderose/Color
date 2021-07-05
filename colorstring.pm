@@ -34,28 +34,32 @@ Returns the escape string needed to switch an ANSI terminal to a given
 foreground color, background color, and/or text effect, or displays something
 in a given color.
 
-The escape-strings can be gotten
-in various forms as needed for use in bash scripts, bash prompt-strings,
-Perl code, etc. (see options). For example:
+For example, to display "oops" in red on stderr:
+    colorstring.pm -w "oops" red
 
-    PS1=`colorstring -ps Cyan` "Hello"
+To display a greeting as a message to stdout in green:
+    colorstring.pm -m "Hello, $USER" green
 
-This encloses the string (in this case "Hello") with the necessary stuff to
-display it in Cyan (on the default background color).
+To see all the available color combinations:
+    colorstring.pm --list
+
+To get the color string in various forms as needed for use in a, 
+bash prompt-strings such as PS1 (in `zsh`, you can use %F{name}...%f{name}
+instead):
+   export PS1=`colorstring -ps cyan`"==>"`colorstring -ps off`
+
 I<-ps> instructs the script to format as needed to embed in
 a bash prompt string (that affects how the escape character is expressed).
 
-    colorstring -m green "Happy birthday"
+=head2 Color name conventions
 
-You can also get color information, for example:
-
-    colorstring --list
-
-shows a table of available foreground and background colors and effects.
 The naming conventions this package uses, are described in F<colorNames.md>.
+In short, use I<foregroundName/backgroundName/effectName>, leaving out 
+names you're not using. Thus, "/blue/italic" will switch to default-color
+italic text on a blue background (assuming your terminal can do that).
 
-# Usage examples:
-#
+=head2 Other features
+
 This script can also:
 
 =over
@@ -492,7 +496,7 @@ my %getoptHash = (
     "perl!"             => \$perl,
     "python!"           => \$python,
     "print"             => \$print,
-    "ps|bash"           => \$ps,
+    "ps1|bash|prompt"   => \$ps,
     "q|quiet!"          => \$quiet,
     "sampleText=s"      => \$sampleText,
     "setenv|envset!"    => \$setenv,
@@ -507,7 +511,7 @@ my %getoptHash = (
 Getopt::Long::Configure ("ignore_case");
 my $result = GetOptions(%getoptHash) || die "Bad options.\n";
 
-warn "Remaining args after getopt: " . join(", ", @ARGV) . ".\n";
+#warn "Remaining args after getopt: " . join(", ", @ARGV) . ".\n";
 
 my $con = my $coff = "";
 if ($color) {

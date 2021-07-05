@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #
+# colorstring.py: Easy access to ANSI terminal color.
 # 2018-08-29: Converted by perl2python, by Steven J. DeRose.
 # Original Perl version written <2006-10-04, by Steven J. DeRose.
 #
 from __future__ import print_function
 import sys, os, re
 import argparse
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import alogging
 from ColorManager import ColorManager
@@ -17,6 +18,7 @@ args = None
 
 __metadata__ = {
     'title'        : "colorstring.py",
+    'description'  : "Easy access to ANSI terminal color.",
     'rightsHolder' : "Steven J. DeRose",
     'creator'      : "http://viaf.org/viaf/50334488",
     'type'         : "http://purl.org/dc/dcmitype/Software",
@@ -176,14 +178,91 @@ environment variable
 `LS_COLORS` specifies them in increasing numeric order (which seems typical).
 For now, such unmatched entries print the color name as '?'.
 
+Of course, for any of this to work, the terminal or terminal program
+(and the user!) have to support color,
+and environment variable `TERM` must say so (e.g., be set to 'xterm-color').
+
 `TERM=xterm-256color' is not supported except for `--list` via `--xterm256`.
 
-Does not have avoid low-contrast pairs, particularly
+Does not have a feature to avoid low-contrast pairs, particularly
 in relation to the default terminal background color (which is hard to
-determine in the first place, though see the `xtermcontrol`, `tput`,
+determine in the first place, though see `xtermcontrol`, `tput`,
 and my `getBGColor` command.
 
-Not entirely in sync with related commands.
+Not entirely in sync with all related commands.
+
+
+=LSCOLORS / LS_COLORS information=
+
+This environment variable determines what color `ls` uses
+for each of its distinct file-types, but differs between Eunices.
+
+You can display (and decode) the settings (hopefully regardless of
+platform) with:
+    colorstring.py --lslist
+
+
+==LSCOLORS On MacOSX / BSD==
+
+On MacOSX, specify `ls -G`, or define environment variable `CLICOLOR`.
+
+`ls` disables colorizing when output is not going to a terminal,
+unless you set `CLICOLOR_FORCE`
+
+==LSCOLORS coding on MacOSX / BSD==
+
+Environment variable `LSCOLORS` should have a length of 22:
+a list of 11 pairs of foreground+background.
+
+The default is "exfxcxdxbxegedabagacad".
+
+The color codes are:
+    a     black
+    b     red
+    c     green
+    d     brown
+    e     blue
+    f     magenta
+    g     cyan
+    h     light grey
+    A     bold black, usually shows up as dark grey
+    B     bold red
+    C     bold green
+    D     bold brown, usually shows up as yellow
+    E     bold blue
+    F     bold magenta
+    G     bold cyan
+    H     bold light grey; looks like bright white
+    x     default foreground or background
+
+They go in the order:
+    1.   directory
+    2.   symbolic link
+    3.   socket
+    4.   pipe
+    5.   executable
+    6.   block special
+    7.   character special
+    8.   executable with setuid bit set
+    9.   executable with setgid bit set
+    10.  directory writable to others, with sticky bit
+    11.  directory writable to others, w/o sticky bit
+
+The Gnu `dircolors` command makes setting up colors easier, but is
+not available by default. You may be able to add it as
+'gdircolors', with:
+
+    brew install coreutils
+
+
+==LS_COLORS On Linux (note the underscore)==
+
+On Linux, specify `ls --color=auto` (or 'always' or 'never').
+Environment variable `CLICOLOR` does not seem to be supported.
+
+With `auto`, color is only used when output is going to a terminal.
+
+Gnu coreutils has `dircolor` to help set up LS_COLORS.
 
 
 =Related commands:=
@@ -198,13 +277,9 @@ kinds of escapes as here
 
 `colorNames.md` -- documentation about color names and usage.
 
-
 ==Related *nix utilities==
 
 Several *nix commands have a `--color=auto' option: `ls`, `grep`, etc.
-
-`dircolors` can be used to set up the colors used by `ls`
-(see also `--lslist` and `--lsset`, above).
 
 `grc` and `logtool` can colorize log files.
 
@@ -269,6 +344,7 @@ Debug new (hashless) way of doing colors.
 Switch to depend on ColorManager.py. Reconcile names, no more `fg_` and `bg_`.
 * 2018-10-22: Fix minor bugs. Refactor. Add `args.txt`, use `ColorManager` more.
 * 2020-10-02: Move effects to end to sync with `colorNames.md`.
+* 2021-05-21: Add lots of info on BSD vs. Linux ls colors. Add `--showLSCOLORS`.
 
 
 =To do=
@@ -392,9 +468,9 @@ def setupDircolors():
     global lsColors
     try:
         lsColors =  re.split(r':', check_output('dircolors'))
-    except Exception as e:
+    except CalledProcessError as e:
         sys.stderr.write(
-            "'dircolors' failed. Only available on Linux:\n    %s" % (e))
+            "'dircolors' failed. OS dependency?\n    %s" % (e))
 
     lsColors[0] = re.sub(r'LS_COLORS=', '', lsColors[0])
     lsColors.pop()  # "export LS_COLORS"
@@ -411,69 +487,72 @@ def processOptions():
     except ImportError:
         parser = argparse.ArgumentParser(description=descr)
 
-    parser.add_argument("--all",            action='store_true',
+    parser.add_argument("--all", action='store_true',
         help="Show all of stdin in the 'colorname'.")
-    parser.add_argument("--breakLines",		action='store_true',
+    parser.add_argument("--breakLines", action='store_true',
         help="With `--list`, put each example on a separate line.")
-    parser.add_argument("--color",			action='store_true',
+    parser.add_argument("--color", action='store_true',
         help="Use color in our own output.")
-    parser.add_argument("--effects",		action='store_true',
+    parser.add_argument("--effects", action='store_true',
         help="Show sample of each effect, to see if your terminal supports it.")
-    parser.add_argument("--envPrefix",      type=str, default="COLORSTRING",
+    parser.add_argument("--envPrefix", type=str, default="COLORSTRING", metavar="P",
         help="Prefix to name env variables for color names with --setenv.")
     parser.add_argument("--helpls", "--help-ls", action='store_true',
         help="Show the file-type-names to set file colors for the 'ls' command")
-    parser.add_argument("--list",           action='store_true',
+    parser.add_argument("--list", action='store_true',
         help="Show all known combination of colors and effects.")
-    parser.add_argument("--lscolorset",     type=str,
-        help="Replace all `LS_COLOR` mappings for a given color, with a new color")
-    parser.add_argument("--lsget",          type=str, default="",
-        help="""Find what color `ls` will use to display file names.
-Provide a sample filename to specify a category (see 'man ls', or the -h here).
-This requires the 'dirColors' command, which may be Linix-only.""")
-    parser.add_argument("--lslist",			action='store_true',
-        help="List how `ls` colors are set up, organized by color.")
-    parser.add_argument("--lsset",          type=str, default="",
-        help="Return a modified `ls` color setup (see above).")
-    parser.add_argument("--msg", "--message", type=str, default="",
+    parser.add_argument("--msg", "--message", type=str, default="", metavar="TXT",
         help="Send this as a message to stdout in the specified color.")
-    parser.add_argument("--perl",			action='store_true',
+    parser.add_argument("--perl", action='store_true',
         help="Return Perl code to generate and assign the color string.")
-    parser.add_argument("--python",			action='store_true',
+    parser.add_argument("--python", action='store_true',
         help="Return Python code to generate and assign the color string.")
-    parser.add_argument("--printStuff",		action='store_true',
+    parser.add_argument("--printStuff", action='store_true',
         help="Print out the color string requested.")
-    parser.add_argument("--ps", "--bash",	action='store_true',
+    parser.add_argument("--ps", "--bash", action='store_true',
         help="Return a color command in the form for a Bash prompt string.")
     parser.add_argument(
-        "--quiet", "-q",                    action='store_true',
+        "--quiet", "-q", action='store_true',
         help='Suppress most messages.')
-    parser.add_argument("--sampleText",     type=str, default="Sampler",
+    parser.add_argument("--sampleText", type=str, default="Sampler", metavar="TXT",
         help="Set the text to be displayed with --table. Default: 'Sampler'.")
     parser.add_argument("--setenv", "--envset", action='store_true',
         help="""Returns a (long) string you can
 use to set a lot of environment variables, to hold the required escapes to
 set given colors. The variable names are 'COLORSTRING_' plus the color names
 you can give to this script (but you can change the prefix using `--envPrefix`.""")
-    parser.add_argument("--table",			action='store_true',
-        help="""Show the main color combinations as a table. This only includes the "plain"
-and "bold" effects, but shows all foreground/background combinations, along
-with the color names and numbers.
+    parser.add_argument("--table", action='store_true',
+        help="""Show the main color combinations as a table. This only includes
+the "plain" and "bold" effects, but shows all foreground/background
+combinations, along with the color names and numbers.
 See also `--breakLines`, `--list`, `--sampleText`, `-v`, and `--xterm256`""")
     parser.add_argument(
-        "--verbose", "-v",                  action='count', default=0,
+        "--verbose", "-v", action='count', default=0,
         help='Add more messages (repeatable).')
     parser.add_argument(
         "--version", action='version', version=__version__,
         help='Display version information, then exit.')
-    parser.add_argument("--warn", "-w",     type=str, default="",
+    parser.add_argument("--warn", "-w", type=str, default="", metavar="TXT",
         help="Send this as a message to stderr in the specified color.")
-    parser.add_argument("--xterm256",			action='store_true',
+    parser.add_argument("--xterm256", action='store_true',
         help="Enable the 256-color set supported by TERM=xterm-256color.")
+
+    # Options related to LS_COLORS / LSCOLORS
+    #
+    parser.add_argument("--lscolorset", type=str,
+        help="Replace all `LS_COLOR` mappings for a given color, with a new color")
+    parser.add_argument("--lsget", type=str, default="",
+        help="""Find what color `ls` will use to display file names.
+Provide a sample file to specify a category (see 'man ls', or the -h here).
+This requires the 'dirColors' command (mainly available on Linux.""")
+    parser.add_argument("--lslist", "--showlscolors", action='store_true',
+        help="List how `ls` colors are set up, organized by color.")
+    parser.add_argument("--lsset", type=str, default="",
+        help="Return a modified `ls` color setup (see above).")
 
     parser.add_argument(
         'colors', type=str, nargs='?', default=None,
-        help='Color name to use. For multiple (alternating), quote the list.')
+        help='Color to use. For multiple (alternating), quote the list.')
 
     parser.add_argument('txt', nargs=argparse.REMAINDER)
 
@@ -569,8 +648,16 @@ def helpLSColors():
     sys.exit()
 
 def doLsList():
-    """Display a list of all the LS_COLORS settings.
+    """Display a list of all the LS_COLORS or LSCOLORS settings.
+    Lots of OS differences here....
     """
+    bsdName = "LSCOLORS"
+    bsdValue = os.environ[bsdName] if bsdName in os.environ else ""
+    print("%s (for BSD): '%s'" % (bsdName, bsdValue))
+    linuxName = "LS_COLORS"
+    linuxValue = os.environ[linuxName] if linuxName in os.environ else ""
+    print("%s (for Linux): '%s'" % (linuxName, linuxValue))
+
     setupDircolors()
     byColor = {}
     for lsc in (lsColors):
