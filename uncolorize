@@ -76,7 +76,7 @@ Sequences containing the parameter bytes `[<=>?]` or the final bytes x70–x7E `
 
 =History=
 
-* 2015-08-31 Written by Steven J. DeRose.
+* 2015-08-31: Written by Steven J. DeRose.
 * 2015-09-17
 * 2020-03-04: Layout, POD to MarkDown, lint.
 * 2020-11-24: Support stdin, not just files. Use `ColorManager.py` directly.
@@ -86,13 +86,12 @@ Sequences containing the parameter bytes `[<=>?]` or the final bytes x70–x7E `
 
 =Rights=
 
-This work by Steven J. DeRose is licensed under a Creative Commons
-Attribution-Share Alike 3.0 Unported License. For further information on
-this license, see [http://creativecommons.org/licenses/by-sa/3.0].
+Copyright 2015-08-31 by Steven J. DeRose. This work is licensed under a
+Creative Commons Attribution-Share-alike 3.0 unported license.
+See [http://creativecommons.org/licenses/by-sa/3.0/] for more information.
 
-The author's present email is sderose at acm.org.
-
-For the most recent version, see [http://www.derose.net/steve/utilities].
+For the most recent version, see [http://www.derose.net/steve/utilities]
+or [https://github.com/sderose].
 
 
 =Options=

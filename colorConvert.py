@@ -13,10 +13,6 @@ import colorsys
 import webcolors
 
 from alogging import ALogger
-<<<<<<< HEAD
-=======
-
->>>>>>> 7829bd4065c8c4566f2d81589e58c0a975a41c23
 lg = ALogger(1)
 palColors = {}
 
@@ -130,61 +126,6 @@ except re.error as e:
 
 ###############################################################################
 #
-<<<<<<< HEAD
-def processOptions():
-    try:
-        from BlockFormatter import BlockFormatter
-        parser = argparse.ArgumentParser(
-            description=descr, formatter_class=BlockFormatter)
-    except ImportError:
-        parser = argparse.ArgumentParser(description=descr)
-
-    parser.add_argument(
-        "--color",  # Don't default. See below.
-        help='Colorize the output.')
-    parser.add_argument(
-        "--iencoding",        type=str, metavar='E', default="utf-8",
-        help='Assume this character set for input files. Default: utf-8.')
-    parser.add_argument(
-        "--oencoding",        type=str, metavar='E',
-        help='Use this character set for output files.')
-    parser.add_argument(
-        "--out",              type=str, default='rgb6', choices=
-        [ 'rgb3', 'rgb6', 'rgb9', 'rgbdec', 'rgb%', 'hsv', 'hsl', 'yiq', 'name' ],
-        help='Suppress most messages.')
-    parser.add_argument(
-        "--pal",              type=str,
-        help='File of "known" colors, one per line as #RRGGBB.')
-    parser.add_argument(
-        "--quiet", "-q",      action='store_true',
-        help='Suppress most messages.')
-    parser.add_argument(
-        "--unicode",          action='store_const',  dest='iencoding',
-        const='utf8', help='Assume utf-8 for input files.')
-    parser.add_argument(
-        "--verbose", "-v",    action='count',       default=0,
-        help='Add more messages (repeatable).')
-    parser.add_argument(
-        "--version", action='version', version=__version__,
-        help='Display version information, then exit.')
-
-    parser.add_argument(
-        'files',             type=str,
-        nargs=argparse.REMAINDER,
-        help='Path(s) to input file(s)')
-
-    args0 = parser.parse_args()
-    if (args0.verbose): lg.setVerbose(args0.verbose)
-    if (args0.color == None):
-        args0.color = ("USE_COLOR" in os.environ and sys.stderr.isatty())
-    lg.setColors(args0.color)
-    return(args0)
-
-
-###############################################################################
-#
-=======
->>>>>>> 7829bd4065c8c4566f2d81589e58c0a975a41c23
 def doOneFile(fh, path):
     """Read and deal with one individual file.
     """
@@ -396,7 +337,7 @@ if (args.pal):
         lg.error("Can't open -pal file '%s'." % (args.pal))
         sys.exit()
     precnum = 0
-    while(True):
+    while (True):
         rec0 = pfh.readline()
         if (rec0==""): break
         precnum += 1
