@@ -414,12 +414,12 @@ def colorizeString(msg, fg, bg="", effect=""):
 
 def colorSeq(name):
     if (isinstance(name, list)):
-        lg.eMsg(0, "Multi-color not yet supported")
+        lg.error("Multi-color not yet supported")
         name = name[0]
     try:
         cs = cm.getColorString(name)
     except TypeError as e:
-        lg.eMsg(0, "Error in ColorManager: %s" % (e))
+        lg.error("Error in ColorManager: %s" % (e))
         cs = ""
     return cs
 
@@ -847,8 +847,6 @@ def outConvert(s:str) -> str:
 
 ###############################################################################
 # Main
-#
-###############################################################################
 #
 def processOptions():
     try:

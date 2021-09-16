@@ -146,7 +146,7 @@ def doOneFile(fh, path):
         if (args.pal):
             #nearest = findNearestPalColor(serialize(rgbTriple, 'rgb6'))
             #outColor += '\t Nearest: %s' % (nearest)
-            lg.eMsg(0, "PAL not yet supported.")
+            lg.error("PAL not yet supported.")
             sys.exit()
         print(outColor)
     fh.close()
