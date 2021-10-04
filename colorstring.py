@@ -283,6 +283,12 @@ kinds of escapes as here
 
 `colorNames.md` -- documentation about color names and usage.
 
+`pygmentize` -- a tool to syntax-color Python code.
+See also [https://unix.stackexchange.com/questions/267361/].
+
+Gnu `source-highlight`, `lesspipe.sh`, and others are similar.
+
+
 ==Related *nix utilities==
 
 Several *nix commands have a `--color=auto' option: `ls`, `grep`, etc.
