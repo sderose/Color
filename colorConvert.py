@@ -215,10 +215,10 @@ def convertNumber(s:str):
     """
     #print("converting: '%s'." % (s))
     try:
-        if (s.endswith('%')):    return(float(s[0:-1])/100)
+        if (s.endswith('%')): return(float(s[0:-1])/100)
         if (s.startswith('0x')): return(int(s[2:],16)/255.0)
-        if (s.startswith('0')):  return(int(s,8)/255.0)
-        if ('.' in s):           return(float(s))
+        if (s.startswith('0')): return(int(s,8)/255.0)
+        if ('.' in s): return(float(s))
         return(float(int(s)/255.0))
     except ValueError as e:
         print("Cannot parse number from '%s'.\n    %s" % (s, e))
@@ -287,42 +287,41 @@ def processOptions():
         parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument(
-        "--color",  # Don't default. See below.
+        "--color", # Don't default. See below.
         help='Colorize the output.')
     parser.add_argument(
-        "--iencoding",        type=str, metavar='E', default="utf-8",
+        "--iencoding", type=str, metavar='E', default="utf-8",
         help='Assume this character set for input files. Default: utf-8.')
     parser.add_argument(
-        "--oencoding",        type=str, metavar='E',
+        "--oencoding", type=str, metavar='E',
         help='Use this character set for output files.')
     parser.add_argument(
-        "--out",              type=str, default='rgb6', choices=
+        "--out", type=str, default='rgb6', choices=
         [ 'rgb3', 'rgb6', 'rgb9', 'rgbdec', 'rgb%', 'hsv', 'hsl', 'yiq', 'name' ],
         help='Suppress most messages.')
     parser.add_argument(
-        "--pal",              type=str,
+        "--pal", type=str,
         help='File of "known" colors, one per line as #RRGGBB.')
     parser.add_argument(
-        "--quiet", "-q",      action='store_true',
+        "--quiet", "-q", action='store_true',
         help='Suppress most messages.')
     parser.add_argument(
-        "--unicode",          action='store_const',  dest='iencoding',
+        "--unicode", action='store_const', dest='iencoding',
         const='utf8', help='Assume utf-8 for input files.')
     parser.add_argument(
-        "--verbose", "-v",    action='count',       default=0,
+        "--verbose", "-v", action='count', default=0,
         help='Add more messages (repeatable).')
     parser.add_argument(
         "--version", action='version', version=__version__,
         help='Display version information, then exit.')
 
     parser.add_argument(
-        'files',             type=str,
-        nargs=argparse.REMAINDER,
+        'files', type=str, nargs=argparse.REMAINDER,
         help='Path(s) to input file(s)')
 
     args0 = parser.parse_args()
     if (args0.verbose): lg.setVerbose(args0.verbose)
-    if (args0.color == None):
+    if (args0.color is None):
         args0.color = ("USE_COLOR" in os.environ and sys.stderr.isatty())
     lg.setColors(args0.color)
     return(args0)
@@ -332,8 +331,8 @@ args = processOptions()
 
 if (args.pal):
     try:
-        pfh = codecs.open(args.pal, mode='r',  encoding=args.iencoding)
-    except IOError as e:
+        pfh = codecs.open(args.pal, mode='r', encoding=args.iencoding)
+    except IOError:
         lg.error("Can't open -pal file '%s'." % (args.pal))
         sys.exit()
     precnum = 0
@@ -356,7 +355,7 @@ else:
     for f in (args.files):
         try:
             fh0 = codecs.open(f, mode='r', encoding=args.iencoding)
-        except IOError as e:
+        except IOError:
             lg.error("Can't open '%s'." % (f), stat="CantOpen")
             sys.exit()
         doOneFile(fh0, f)

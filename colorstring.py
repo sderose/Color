@@ -4,8 +4,9 @@
 # 2018-08-29: Converted by perl2python, by Steven J. DeRose.
 # Original Perl version written <2006-10-04, by Steven J. DeRose.
 #
-from __future__ import print_function
-import sys, os, re
+import sys
+import os
+import re
 import argparse
 from subprocess import check_output, CalledProcessError
 
@@ -388,8 +389,10 @@ For further information on this license, see
 
 For the most recent version, see [http://www.derose.net/steve/utilities]
 or [https://github.com/sderose].
-"""
 
+
+=Options=
+"""
 
 boldToken = "bold"
 blinkToken = "blink"
@@ -557,18 +560,18 @@ class LSColors:
         """
         if (not os.path.exists(path)): return -1
         st = os.stat(path)
-        if (st.S_ISLNK):  return 2     # symbolic link
-        if (st.S_ISSOCK): return 3     # socket
-        if (st.S_ISFIFO): return 4     # pipe
-        if (st.S_ISBLK):  return 6     # block special
-        if (st.S_ISCHR):  return 7     # character special
+        if (st.S_ISLNK): return 2   # symbolic link
+        if (st.S_ISSOCK): return 3  # socket
+        if (st.S_ISFIFO): return 4  # pipe
+        if (st.S_ISBLK): return 6   # block special
+        if (st.S_ISCHR): return 7   # character special
         if (st.S_ISDIR):
             if (st.S_ISWOTH and st.S_ISVTX): return 10  # dir w to others, +sticky bit
             if (st.S_ISWOTH and not st.S_ISVTX): return 11  # dir w to others, -sticky bit
             return 1                           # directory
         if (LSColors.isExecutable(st)):
-            if (st.S_ISUID): return 8  # executable with setuid bit set
-            if (st.S_ISGID): return 9  # executable with setgid bit set
+            if (st.S_ISUID): return 8          # executable with setuid bit set
+            if (st.S_ISGID): return 9          # executable with setgid bit set
             return 5                           # executable
         assert st.s_ISREG
         return 0                               # (0 for regular file)
@@ -590,10 +593,9 @@ class LSColors:
         """
         global lsColors
         try:
-            lsColors =  re.split(r':', check_output('dircolors'))
+            lsColors = re.split(r':', check_output('dircolors'))
         except CalledProcessError as e:
-            sys.stderr.write(
-                "'dircolors' failed. OS dependency?\n    %s" % (e))
+            sys.stderr.write("'dircolors' failed. OS dependency?\n    %s" % (e))
 
         lsColors[0] = re.sub(r'LS_COLORS=', '', lsColors[0])
         lsColors.pop()  # "export LS_COLORS"
@@ -625,7 +627,7 @@ class LSColors:
             mat = re.search(r'^(.*)=(.*)', lsc)
             #expr = mat.group(1)
             colorCode = mat.group(2)
-            if (not None ==  byColor[colorCode]):
+            if (byColor[colorCode] is not None):
                 byColor[colorCode] = ""
             byColor[colorCode] += "expr "
 
@@ -702,14 +704,14 @@ def showList() -> None:
 #
 def setupEffects() -> None:
     shortMap = {
-        "black"	    : "blk",
-        "red"	    : "red",
-        "green"	    : "grn",
-        "yellow"	: "yel",
-        "blue"	    : "blu",
-        "magenta"	: "mag",
-        "cyan"  	: "cyn",
-        "white"	    : "wht",
+        "black"     : "blk",
+        "red"       : "red",
+        "green"     : "grn",
+        "yellow"    : "yel",
+        "blue"      : "blu",
+        "magenta"   : "mag",
+        "cyan"      : "cyn",
+        "white"     : "wht",
     }
     effects = sorted(effectsOn.keys())
     for e in range(len(effects)):
@@ -992,7 +994,7 @@ elif (args.txt):
     print(cm.colorize(color0, " ".join(args.txt)))
 else:
     lg.vMsg(1, "No special options, so expecting a color name.")
-    cName =  args.colors
+    cName = args.colors
     escString = colorSeq(cName)
     if (not escString):
         print("colorstring: Unknown color key '%s'. Use -h for help." % (cName))
