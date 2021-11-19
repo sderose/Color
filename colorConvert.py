@@ -63,7 +63,7 @@ a ''ValueError'' exception is raised.
 
 =Related Commands=
 
-Packages: colorsys, webcolors L<https://pypi.python.org/pypi/webcolors/1.3>
+Packages: colorsys, webcolors [https://pypi.python.org/pypi/webcolors/1.3].
 
 Pantone conversion is said to be supported
 by [https://pypi.python.org/pypi/pycolorname]

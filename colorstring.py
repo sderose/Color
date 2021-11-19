@@ -166,8 +166,6 @@ The caller should store this in environment variable `LS_COLORS`), e.g.:
 
     export LS_COLORS=`colorstring --lsset di red`
 
-=back
-
 
 =Known bugs and limitations=
 
