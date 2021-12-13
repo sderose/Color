@@ -63,10 +63,10 @@ a ''ValueError'' exception is raised.
 
 =Related Commands=
 
-Packages: colorsys, webcolors [https://pypi.python.org/pypi/webcolors/1.3].
+Pip packages: colorsys, webcolors [https://pypi.python.org/pypi/webcolors/1.3].
 
 Pantone conversion is said to be supported
-by [https://pypi.python.org/pypi/pycolorname]
+by [https://pypi.python.org/pypi/pycolorname].
 
 `python-colormath` supports many color spaces, but it's ''big''.
 See ''https://python-colormath.readthedocs.org/en/latest/].
@@ -119,8 +119,8 @@ try:
     fe = r'(\w+)\(%s,%s,%s(,%s)?\)' % (token,token,token,token)
     print("Expr: /%s/'" % (fe))
     functionExpr = re.compile(fe)
-except re.error as e:
-    print("Bad regex: '%s'.\n    %s" % (fe, e))
+except re.error as e0:
+    print("Bad regex: '%s'.\n    %s" % (fe, e0))
     sys.exit()
 
 
@@ -136,7 +136,7 @@ def doOneFile(fh, path):
             rec = fh.readline()
         except IOError as e:
             lg.error("Error (%s) reading record %d of '%s'." %
-                (type(e), recnum, path), stat="readError")
+                (type(e), recnum, path))
             break
         if (len(rec) == 0): break # EOF
         recnum += 1
@@ -179,8 +179,8 @@ def cconvert(s):
         a2    = convertNumber(mat.group(3))
         a3    = convertNumber(mat.group(4))
         # TODO: Do something with alpha....
-        if (mat.group(5)): alpha = convertNumber(mat.group(5))
-        else: alpha = 0
+        # if (mat.group(5)): alpha = convertNumber(mat.group(5))
+        # else: alpha = 0
 
         if (func == 'rgb' or func == 'rgba'):
             rgbTriple = [ a1, a2, a3 ]
@@ -356,7 +356,7 @@ else:
         try:
             fh0 = codecs.open(f, mode='r', encoding=args.iencoding)
         except IOError:
-            lg.error("Can't open '%s'." % (f), stat="CantOpen")
+            lg.error("Can't open '%s'." % (f))
             sys.exit()
         doOneFile(fh0, f)
         fh0.close()
