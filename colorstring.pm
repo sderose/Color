@@ -364,6 +364,17 @@ replaced by an X11 colorspec, e.g., rgb:0000/0000/0000 for black.
 L<http://http://push.cx/2008/256-color-xterms-in-ubuntu>
 
 
+=head1 To do
+
+  Use the ColorManager.pm class!
+    Update internals to use right naming conventions (a la colorNames.md), and
+to not make a big unnecessary hash of all the possibilities.
+  Add alternate setup to tag stuff with HTML instead.
+  Offer alternate color sets for setenv, for light vs. dark backgrounds.
+  lsset should support replacing all mappings for a given color.
+  Pull in the colorName to HTML mapping from hilite::getStartTag.
+
+
 =head1 History
 
   Written <2006-10-04, Steven J. DeRose.
@@ -384,16 +395,6 @@ Change 'fg2_' prefix to 'bold_' and factor out of code.
 Debug new (hashless) way of doing colors.
   2018-08-29: Ported to Python. *******
   2020-11-20: New layout.
-
-
-=head1 To do
-
-  Use the ColorManager.pm class!
-    Update internals to use right naming conventions (a la colorNames.md), and
-to not make a big unnecessary hash of all the possibilities.
-  Add alternate setup to tag stuff with HTML instead.
-  Offer alternate color sets for setenv, for light vs. dark backgrounds.
-  lsset should support replacing all mappings for a given color.
 
 
 =head1 Rights

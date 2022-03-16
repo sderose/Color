@@ -370,6 +370,7 @@ distinction.
 Perhaps move LSColors class to a separate package?
 * Use `rgb.txt` with xterm-256color to pick by name?
 * Colorize by fields?
+* Pull in the colorName to HTML mapping from Perl hilite::getStartTag.
 
 * Expand the test/sample feature (and maybe general support?) to cover
 other ANSI esacpes, such as:
