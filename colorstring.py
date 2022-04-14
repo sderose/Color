@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # colorstring.py: Easy access to ANSI terminal color.
 # 2018-08-29: Converted by perl2python, by Steven J. DeRose.

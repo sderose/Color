@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # colorConvert.py: Normalize various color specs.
 # 2016-04-14: Written. Copyright by Steven J. DeRose.

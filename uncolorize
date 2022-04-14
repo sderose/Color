@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # uncolorize: Remove ANSI terminal color escape sequences, fake bold, etc.
 # 2015-08-31: Written by Steven J. DeRose.
