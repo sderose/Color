@@ -933,7 +933,7 @@ This requires the 'dirColors' command (mainly available on Linux.""")
     parser.add_argument('txt', nargs=argparse.REMAINDER)
 
     args0 = parser.parse_args()
-    if (args0.color is None and ('USE_COLOR' in os.environ)): args0.color = True
+    if (args0.color is None and ('CLI_COLOR' in os.environ)): args0.color = True
     if (args0.colors):
         args0.colors = re.split(r'\s+', args0.colors.strip())
     else:

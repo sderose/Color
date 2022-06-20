@@ -448,7 +448,7 @@ my %colorTable = ();     # Map from named colors to codes.
 #
 my $all        = 0;
 my $break      = 0;
-my $color      = $ENV{USE_COLOR} ? 1:0;
+my $color      = $ENV{CLI_COLOR} ? 1:0;
 my $effects    = 0;
 my $envPrefix  = "COLORSTRING";
 my $list       = 0;

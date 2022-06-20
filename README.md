@@ -4,7 +4,7 @@ Utilities for dealing with ANSI color features on terminals.
 These mainly just handle the basic set (8 colors), not xterm-256.
 
 Many of my scripts support a --color option, which usually default to ON
-if environment variable USE_COLOR is set, otherwise to OFF.
+if environment variable CLI_COLOR is set, otherwise to OFF.
 
 See: [http://github.com/sderose/Color].
 See also: ../PYTHONLIBS/ColorManager.py
