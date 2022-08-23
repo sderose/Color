@@ -35,9 +35,11 @@ foreground color, background color, and/or text effect, or displays something
 in a given color.
 
 For example, to display "oops" in red on stderr:
+
     colorstring.pm -w "oops" red
 
 To display a greeting as a message to stdout in green:
+
     colorstring.pm -m "Hello, $USER" green
 
 To see all the available color combinations:
@@ -46,6 +48,7 @@ To see all the available color combinations:
 To get the color string in various forms as needed for use in a, 
 bash prompt-strings such as PS1 (in `zsh`, you can use %F{name}...%f{name}
 instead):
+
    export PS1=`colorstring -ps cyan`"==>"`colorstring -ps off`
 
 I<-ps> instructs the script to format as needed to embed in
@@ -82,7 +85,7 @@ to your F<.emacs> or other init file:
 
 =head2 Color names used
 
-The color names available are defined in F<bingit/SHELL/colorNames.md>,
+The color names available are defined in F<Color/colorNames.md>,
 which supercedes anything in specific scripts (they I<should> match).
 
 

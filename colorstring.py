@@ -67,7 +67,7 @@ quite differently on different *nix flavors (see below for details).
 
 ==Color names used==
 
-The color names available are defined in `bingit/SHELL/colorNames.md`,
+The color names available are defined in `Color/colorNames.md`,
 which supercedes anything in specific scripts (they `should` match).
 
 ==Color with emacs==
