@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 #
 # colorstring.pm: Support for ANSI terminal colors and effects.
 # 2006-10: Written by Steven J. DeRose.

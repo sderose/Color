@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 #
 # Written 2012-12-06 by Steven J. DeRose.
 # 2013-09-04: Support backslash.
