@@ -34,41 +34,60 @@ __version__ = __metadata__['modified']
 descr = """
 =Usage=
 
-colorstring [options] colorname [text]
+colorstring.py [options] colorname [text]
 
-Return the escape sequence to switch an ANSI terminal to a given color,
-or turn stdin to that color.
+1: Get a neat chart of foreground/background samples (see also `--list`):
+    colorstring.py --table
 
-This also has features similar to Gnu 'dircolors' (which is not available
-by default on MacOS, BSD, etc.), to help set up colorizing for `ls`.
+2: Issue a message to stdout in a given color (see also `--msg` and `--warn`):
+    colorstring.py "Hello, world" red/white/bold
 
-Usage examples:
+3: Like (2) but reading stdin for the message:
+
+4: Return the escape sequence to switch an ANSI terminal to a given color:
+    colorstring.py
+
+5: Like (3), but return the form that goes in a zsh or bash prompt string:
     PS1=`colorstring -ps Cyan` Hello, `colorstring -ps green`"world ==>"
-    colorstring --list
+
+6: Examine or change environment variable LSCOLORS, which is used to
+control how `ls` colorizes various file types. This is similar to
+Gnu 'dircolors' (which is not available
+by default on MacOS, BSD, etc.), and shell function from my `ShellSetup`.
+
+==Color naming==
 
 Colors are specified as a named
-foreground color, background color, and/or text effect, such as
-"red/yellow/bold". For full details on the naming conventions, see
-`colorNames.md` or `ColorManager.py`. There is also a Perl version.
+foreground color, background color, and/or text effect, for example:
+    red/yellow/bold
 
-Such sequences can be gotten
-in various forms as needed for use in bash scripts, bash prompt-strings,
-Perl code, etc. (see options).
+Color names (add 30 for foreground, 40 for background) include:
+    NAME      ANSI CODE
+    "black"   0
+    "red"     1
+    "green"   2
+    "yellow"  3
+    "blue"    4
+    "magenta" 5
+    "cyan"    6
+    "white"   7
+    "default" 9
 
-This script can also:
+Effect names (only a few terminals know them all) include:
+    NAME         ANSI CODE
+    "bold"       1   aka 'bright'
+    "faint"      2
+    "italic"     3   (rare)
+    "underline"  4   aka 'ul'
+    "blink"      5
+    "fblink"     6?  aka 'fastblink' (rare)
+    "reverse"    7   aka 'inverse'
+    "concealed"  8   aka 'invisible' or 'hidden'
+    "strike"     9   aka 'strikethru' or 'strikethrough'
+    "plain"      0   (can be used to express "no special effect")
 
-* display lists of colors (`--list`, `--table`);
-
-* colorize messages and send them to STDIIN (`-m`) or STDERR (`-w`); or
-
-* interact with the *nix `lscolors` command
-(`--lscolorset`, `--lsget`, `--lslist`, and `--lsset`). This works
-quite differently on different *nix flavors (see below for details).
-
-==Color names used==
-
-The color names available are defined in `Color/colorNames.md`,
-which supercedes anything in specific scripts (they `should` match).
+For more details on the naming conventions (shared by many of my utilities),
+see `colorNames.md` or `ColorManager.py`. There is also a Perl version.
 
 ==Color with emacs==
 
@@ -91,7 +110,7 @@ specify the predefined patterns 'usa', 'christmas', 'italy', or 'rainbow'.
 Show the reserved file-type-names that can be used to set file
 colors for the *nix `ls` command, based on
 file ''types'' (rather than filename-expressions).
-These names can be used in the `LS_COLORS` environment variable.
+These names can be used in the `LSCOLORS` or `LS_COLORS` environment variable.
 For example, 'ex' can be used to set the color for executable files.
 
 * ''--list''
@@ -111,7 +130,7 @@ With `--xterm256` and `--breakLines`, a line will be shown for each color number
 * ''--lscolorset'' `oldcolor` `newcolor`
 
 (that's an el at the beginning, not one or eye)
-Replace all the `LS_COLOR` mappings
+Replace all the environment-variable-specified mappings
 for a given color, with a new color (see `--lslist` option for a description
 of a typical default mapping).
 
@@ -130,7 +149,8 @@ the mnemonics `dircolors` uses to refer to various file classes (otherwise,
 it assigns color by file extensions).
 See `--lsset` for a slightly easier way to modify `dircolors`.
 
-In general, the default settings are (on my system):
+In general, the default settings are (on my system -- BSD and Linux are
+significantly different):
 
 ** Red:               Archives (tar, jar, zip, etc.)
 ** Green:             ex: Executables
@@ -169,15 +189,18 @@ The caller should store this in environment variable `LS_COLORS`), e.g.:
 
 =Known bugs and limitations=
 
-Not yet as thoroughly tested as the Perl predecessor.
+Different *nix versions differ between LSCOLORS and LS_COLORS.
+
+Not yet as thoroughly tested as the Perl predecessor, esp. --msg and --warn
+and just getting a raw code.
 
 You can't set more than one effect (such as blink, bold, inverse, hidden,
 and underline) at once.
 
 The color-name lookup used with the `--lslist` option can't handle
 simultaneous property, foreground, and background settings unless the
-environment variable
-`LS_COLORS` specifies them in increasing numeric order (which seems typical).
+environment variable (`LS_COLORS` or `LSCOLORS`)
+specifies them in increasing numeric order (which seems typical).
 For now, such unmatched entries print the color name as '?'.
 
 Of course, for any of this to work, the terminal or terminal program
@@ -194,7 +217,7 @@ and my `getBGColor` command.
 Not entirely in sync with all related commands.
 
 
-=LSCOLORS / LS_COLORS information (note the lack of any underscore)=
+=LSCOLORS / LS_COLORS information=
 
 These environment variables determine what color `ls` uses
 for each of its distinct file-types. How this works differs between Eunices.
@@ -232,7 +255,8 @@ these 11 catgories of file:
 The function `getFileCategory()` will return the applicable number (1 to 11)
 for a given path.
 
-The default LSCOLORS setting is likely "exfxcxdxbxegedabagacad".
+The default LSCOLORS setting is likely "", which is treated
+as "exfxcxdxbxegedabagacad".
 
 The color codes are:
     a     black
@@ -270,7 +294,7 @@ With `auto`, color is only used when output is going to a terminal.
 Gnu coreutils has `dircolor` to help set up LS_COLORS.
 
 
-=Related commands:=
+=Related commands=
 
 `sjdUtils.pm` -- provides colorized messages, and functions to get the same
 kinds of escapes as here
@@ -282,10 +306,13 @@ kinds of escapes as here
 
 `colorNames.md` -- documentation about color names and usage.
 
+`ShellSetup/setupColors` -- defines some shell functions for dealing
+with $LSCOLORS.
+
 `pygmentize` -- a tool to syntax-color Python code.
 See also [https://unix.stackexchange.com/questions/267361/].
 
-Gnu `source-highlight`, `lesspipe.sh`, and others are similar.
+Gnu `source-highlight`, `lesspipe.sh`, `dircolors`, and others are similar.
 
 
 ==Related *nix utilities==
@@ -362,6 +389,7 @@ distinction.
 
 =To do=
 
+* Allow r'light\W?grey' as synonym for 'white'. cf zsh prompt specs.
 * Make it just issue the command-line args as a message if present.
 * Add alternate setup to tag stuff with HTML instead.
 * Consider integrating with mappings from `mathAlphanumerics.py`.
@@ -392,6 +420,13 @@ or [https://github.com/sderose].
 
 =Options=
 """
+
+if ("lscolorVarName" in os.environ):
+    theEnvVarName = os.environ("lscolorVarName")
+elif ("OSTYPE" in os.environ and os.environ["OSTYPE"] == "darwin"):
+    theEnvVarName = "LSCOLORS"
+else:
+    theEnvVarName = "LS_COLORS"
 
 boldToken = "bold"
 blinkToken = "blink"
@@ -612,6 +647,7 @@ class LSColors:
     def doLsList():
         """Display a list of all the LS_COLORS or LSCOLORS settings.
         Lots of OS differences here....
+        See also 'theEnvVarName', set up top.
         """
         bsdName = "LSCOLORS"
         bsdValue = os.environ[bsdName] if bsdName in os.environ else ""
