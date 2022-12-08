@@ -25,7 +25,7 @@ __metadata__ = {
     'type'         : "http://purl.org/dc/dcmitype/Software",
     'language'     : "Python 3.7",
     'created'      : "2018-08-29",
-    'modified'     : "2021-07-01",
+    'modified'     : "2022-12-07",
     'publisher'    : "http://github.com/sderose",
     'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
@@ -34,26 +34,40 @@ __version__ = __metadata__['modified']
 descr = """
 =Usage=
 
-colorstring.py [options] colorname [text]
+colorstring.py [options] [text]
 
-1: Get a neat chart of foreground/background samples (see also `--list`):
+* Issue a message to stdout in a given color:
+    colorstring.py -c red/white/bold "Hello, world"
+
+* Same but issue to stderr (using '--warn' or '-w'):
+    colorstring.py -w -c red/white/ital "Hello, world"
+
+* Read stdin and colorize lines in a cycle of red, white, and blinking blue
+(though many terminals do not support "blink"):
+    colorstring.py --all -c red -c white -c blue/blink
+
+* Return the escape sequence to switch an ANSI terminal to the given color:
+    colorstring.py --ansi -c white/black/bold
+
+* Return that same escape string, but with the ESCAPE in the form
+that goes in a bash prompt string (in the second case, also have bash assign it).
+This also include the special
+sequences (\\[...\\]) to make bash not count the escapes into line-length:
+    colorstring -ps -c Cyan
+    PS1=`colorstring -bps -c Cyan` Hello, `colorstring -bps -c green`"world ==>"
+
+* Same, but the form needed to embed in a zsh prompt string (incomplete):
+    colorstring -zps -c Cyan
+    PS1=`colorstring -zps -c Cyan` Hello, `colorstring -zps -c green`"world ==>"
+
+* Show a neat chart of foreground/background samples (see also `--list`):
     colorstring.py --table
 
-2: Issue a message to stdout in a given color (see also `--msg` and `--warn`):
-    colorstring.py "Hello, world" red/white/bold
-
-3: Like (2) but reading stdin for the message:
-
-4: Return the escape sequence to switch an ANSI terminal to a given color:
-    colorstring.py
-
-5: Like (3), but return the form that goes in a zsh or bash prompt string:
-    PS1=`colorstring -ps Cyan` Hello, `colorstring -ps green`"world ==>"
-
-6: Examine or change environment variable LSCOLORS, which is used to
+* Examine or change environment variable LSCOLORS, which is used to
 control how `ls` colorizes various file types. This is similar to
 Gnu 'dircolors' (which is not available
-by default on MacOS, BSD, etc.), and shell function from my `ShellSetup`.
+by default on MacOS, BSD, etc.), and shell function from my `ShellSetup`:
+    ...
 
 ==Color naming==
 
@@ -267,22 +281,15 @@ The color codes are:
     f     magenta
     g     cyan
     h     light grey
-    A     bold black, usually shows up as dark grey
-    B     bold red
-    C     bold green
-    D     bold brown, usually shows up as yellow
-    E     bold blue
-    F     bold magenta
-    G     bold cyan
-    H     bold light grey; looks like bright white
     x     default foreground or background
+
+If capitalized, the corresponding bold color is used.
 
 The Gnu `dircolors` command makes setting up colors easier, but is
 not available by default on MacOSX. You may be able to add it as
 'gdircolors', with:
 
     brew install coreutils
-
 
 ==LS_COLORS On Linux (note the underscore)==
 
@@ -385,21 +392,21 @@ Switch to depend on ColorManager.py. Reconcile names, no more `fg_` and `bg_`.
 * 2021-05-21: Add lots of info on BSD vs. Linux ls colors. Add `--showLSCOLORS`.
 * 2021-07-01: Split LSCOLORS-related stuff into separate class. Add bsd/linux
 distinction.
+* 2022-12-07: Reorganize options to make more sense.
+Allow 'light grey' as synonym for 'white'. cf zsh prompt specs.
+Fix wrong args to ColorManager.colorize(). Support --table + --effects.
 
 
 =To do=
 
-* Allow r'light\W?grey' as synonym for 'white'. cf zsh prompt specs.
-* Make it just issue the command-line args as a message if present.
+* Move in the predefined patterns from Perl version.
 * Add alternate setup to tag stuff with HTML instead.
 * Consider integrating with mappings from `mathAlphanumerics.py`.
 * Offer alternate color sets for `setenv` for light vs. dark backgrounds.
 * `lsset` should support replacing all mappings for a given color.
 Perhaps move LSColors class to a separate package?
 * Use `rgb.txt` with xterm-256color to pick by name?
-* Colorize by fields?
 * Pull in the colorName to HTML mapping from Perl hilite::getStartTag.
-
 * Expand the test/sample feature (and maybe general support?) to cover
 other ANSI esacpes, such as:
 ** Double-Height Letters
@@ -450,9 +457,10 @@ def cseq(name):
 
 ###############################################################################
 #
-def colorizeString(msg, fg, bg="", effect=""):
+def colorizeString(msg, fg:str="", bg:str="", effect:str=""):
     """Basically the same as ColorManager.colorize().
     """
+    #print("calling cm.colorize with '%s', '%s', '%s'." % (fg, bg, effect))
     return cm.colorize(msg, fg=fg, bg=bg, effect=effect)
 
 def colorSeq(name):
@@ -675,7 +683,7 @@ class LSColors:
             print("%s%s (%s):%s %s" % (con2, code, name, coff, byColor[code]))
 
     @staticmethod
-    def doLsGet(what):
+    def doLsGet(what:str):
         LSColors.setupDircolors()
         found = 0
         coff = cm.getColorString('default')
@@ -711,7 +719,22 @@ def showTable(sampleText:str="Text") -> None:
         thead2 += str(cnum+40).ljust(slen+1)
     print(thead1 + "\n" + thead2)
 
-    for effectName in [ "Bold", "Plain" ]:
+    effects = [ "Bold", "Plain" ]
+    if (args.effects):
+        effects = [
+            "plain"      ,  # 0   (can be used to express "no special effect")
+            "bold"       ,  # 1   aka 'bright'
+            "faint"      ,  # 2
+            "italic"     ,  # 3   (rare)
+            "underline"  ,  # 4   aka 'ul'
+            "blink"      ,  # 5
+            "fblink"     ,  # 6?  aka 'fastblink' (rare)
+            "reverse"    ,  # 7   aka 'inverse'
+            "concealed"  ,  # 8   aka 'invisible' or 'hidden'
+            "strike"     ,  # 9   aka 'strikethru' or 'strikethrough'
+        ]
+
+    for effectName in effects:
         print("\nTable of %s foreground colors on all backgrounds:" % (effectName))
         print(thead1 + "\n" + thead2)
         for i, fgName in enumerate(atomicColors.keys()):
@@ -751,20 +774,16 @@ def setupEffects() -> None:
     effects = sorted(effectsOn.keys())
     for e in range(len(effects)):
         print("")
-        print("******* Colors with " + (effects[e] or "no") + " effects:")
+        print("******* Colors with " + (effects[e] or "no") + " effect:")
 
-        if (effects[e] != "plain"):
-            eff = effects[e] + "_"
-        else:
-            eff = ""
         for fg in (atomicColors):
+            print("fg: '%s'." % (fg))
             buf0 = ""
             for bg in (atomicColors):
                 sample = ' ' + shortMap[fg] + "/" + shortMap[bg] + ' '
-                key = eff + fg
                 if (args.breakLines): sep = "\n"
                 else: sep = " "
-                buf0 += colorizeString(sample, key, bg) + sep
+                buf0 += colorizeString(sample, fg=fg, bg=bg, effect=eff) + sep
             print(buf0)
 
         print("")
@@ -784,7 +803,7 @@ def try256() -> None:
 
 def showEffectSamples() -> None:
     for e in (sorted(effectsOn.keys())):
-        print("%-30s '%s'" % (e, colorizeString(e, args.sampleText)))
+        print("%-12s '%s'" % (e, colorizeString(args.sampleText, fg="blue", bg="white", effect=e)))
 
 def colorizeStdin() -> None:
     reset = colorSeq("default")
@@ -829,7 +848,7 @@ def colorizeStdin() -> None:
         rec = rec.strip()
         print(esc + clist[n] + rec
             + esc + reset
-            + esc + bg_reset + "\n")
+            + esc + bg_reset)
         n += 1
         if (n >= len(clist)):
             n = 0
@@ -862,8 +881,19 @@ def outConvert(s:str) -> str:
         new = re.sub(r':+$', '', new)
         s = new
 
-    elif (args.ps):
+    elif (args.ansi):
+        s = "\x1B" + s
+
+    elif (args.bps):
         s = "\\[\\e" + s + "\\]\n"
+
+    elif (args.zps):
+        tokens = re.split(r"/", s)
+        sys.stderr.write("--zps not yet supported, sorry.")
+        if (len(tokens) < 2):
+            s = "%%F{%s}%s%%f" % (tokens[0], s)
+        else:
+            s = "%%F{%s}%%K{%s}%s%%f%%k" % (tokens[0], tokens[1], s)
 
     elif (args.perl):
         s = "   \\colors[\"colorName\"] = \"\\e" + s + "\n"
@@ -871,10 +901,7 @@ def outConvert(s:str) -> str:
     elif (args.python):
         s = "   colors[colorName] = u\"\\x1B\"" + s + "\n"
 
-    elif (args.printStuff):
-        s = "   ESC " + s + "\n"
-
-    elif (args.txt or args.warn):
+    elif (args.text or args.warn):
         s1 = esc + s
         s3 = esc + cseq("default") + "\n"
         s = s1 + args.msg + s3
@@ -899,58 +926,52 @@ def processOptions():
     except ImportError:
         parser = argparse.ArgumentParser(description=descr)
 
-    parser.add_argument("--all", action='store_true',
-        help="Show all of stdin in the 'colorname'.")
-    parser.add_argument("--breakLines", action='store_true',
-        help="With `--list`, put each example on a separate line.")
-    parser.add_argument("--color", action='store_true',
-        help="Use color in our own output.")
-    parser.add_argument("--effects", action='store_true',
-        help="Show sample of each effect, to see if your terminal supports it.")
-    parser.add_argument("--envPrefix", type=str, default="COLORSTRING", metavar="P",
-        help="Prefix to name env variables for color names with --setenv.")
-    parser.add_argument("--helpls", "--help-ls", action='store_true',
-        help="Show the file-type-names to set file colors for the 'ls' command")
-    parser.add_argument("--list", action='store_true',
-        help="Show all known combination of colors and effects.")
-    parser.add_argument("--msg", "--message", type=str, default="", metavar="TXT",
-        help="Send this as a message to stdout in the specified color.")
+    # Output color(s) and format choices
+    #
+    parser.add_argument("--colors", "-c", type=str, action='append',
+        help="Color to use (e.g., 'red/white/bold'). Repeat to cycle by line.")
     parser.add_argument("--perl", action='store_true',
         help="Return Perl code to generate and assign the color string.")
     parser.add_argument("--python", action='store_true',
         help="Return Python code to generate and assign the color string.")
     parser.add_argument("--printStuff", action='store_true',
         help="Print out the color string requested.")
-    parser.add_argument("--ps", "--bash", action='store_true',
-        help="Return a color command in the form for a Bash prompt string.")
-    parser.add_argument(
-        "--quiet", "-q", action='store_true',
-        help='Suppress most messages.')
+    parser.add_argument("--ansi", action='store_true',
+        help="Return a literal ANSI color escape string.")
+    parser.add_argument("--bps", "--bash", action='store_true',
+        help="Return a color command escaped as for a Bash prompt string.")
+    parser.add_argument("--zps", "--zsh", action='store_true',
+        help="Return a color command in the form for a zsh prompt string.")
+
+    # What to actually colorize and where to send it.
+    #
+    parser.add_argument("--all", action='store_true',
+        help="Show all of stdin in the 'colorname'.")
+    parser.add_argument("--warn", "-w", action='store_true',
+        help="Send the text to stderr.")
+
+    # Lists and charts and such
+    #
+    parser.add_argument("--breakLines", action='store_true',
+        help="With `--list`, put each example on a separate line.")
+    parser.add_argument("--effects", action='store_true',
+        help="Show sample of each effect, to see if your terminal supports it.")
+    parser.add_argument("--helpls", "--help-ls", action='store_true',
+        help="Show the file-type-names to set file colors for the 'ls' command")
+    parser.add_argument("--list", action='store_true',
+        help="Show all known combination of colors and effects.")
     parser.add_argument("--sampleText", type=str, default="Sample", metavar="TXT",
         help="Set the text to be displayed with --table. Default: 'Sampler'.")
-    parser.add_argument("--setenv", "--envset", action='store_true',
-        help="""Returns a (long) string you can
-use to set a lot of environment variables, to hold the required escapes to
-set given colors. The variable names are 'COLORSTRING_' plus the color names
-you can give to this script (but you can change the prefix using `--envPrefix`.""")
     parser.add_argument("--table", action='store_true',
         help="""Show the main color combinations as a table. This only includes
 the "plain" and "bold" effects, but shows all foreground/background
 combinations, along with the color names and numbers.
 See also `--breakLines`, `--list`, `--sampleText`, `-v`, and `--xterm256`.""")
-    parser.add_argument(
-        "--verbose", "-v", action='count', default=0,
-        help='Add more messages (repeatable).')
-    parser.add_argument(
-        "--version", action='version', version=__version__,
-        help='Display version information, then exit.')
-    parser.add_argument("--warn", "-w", type=str, default="", metavar="TXT",
-        help="Send this as a message to stderr in the specified color.")
-    parser.add_argument("--xterm256", action='store_true',
-        help="Enable the 256-color set supported by TERM=xterm-256color.")
 
     # Options related to LS_COLORS / LSCOLORS
     #
+    parser.add_argument("--envPrefix", type=str, default="COLORSTRING", metavar="P",
+        help="Prefix to name env variables for color names with --setenv.")
     parser.add_argument("--lscolorset", type=str,
         help="Replace all `LS_COLOR` mappings for a given color, with a new color")
     parser.add_argument("--lsget", type=str, default="",
@@ -961,22 +982,40 @@ This requires the 'dirColors' command (mainly available on Linux.""")
         help="List how `ls` colors are set up, organized by color.")
     parser.add_argument("--lsset", type=str, default="",
         help="Return a modified `ls` color setup (see above).")
+    parser.add_argument("--setenv", "--envset", action='store_true',
+        help="""Returns a (long) string you can
+use to set a lot of environment variables, to hold the required escapes to
+set given colors. The variable names are 'COLORSTRING_' plus the color names
+you can give to this script (but you can change the prefix using `--envPrefix`.""")
 
+    # Miscellaneous options
+    #
+    parser.add_argument("--quiet", "-q", action='store_true',
+        help='Suppress most messages.')
     parser.add_argument(
-        'colors', type=str, nargs='?', default=None,
-        help='Color to use. For multiple (alternating), quote the list.')
+        "--verbose", "-v", action='count', default=0,
+        help='Add more messages (repeatable).')
+    parser.add_argument(
+        "--version", action='version', version=__version__,
+        help='Display version information, then exit.')
+    parser.add_argument("--xterm256", action='store_true',
+        help="Enable the 256-color set supported by TERM=xterm-256color.")
 
-    parser.add_argument('txt', nargs=argparse.REMAINDER)
+    # Rest of arguments (non-option text)
+    #
+    parser.add_argument(
+        'text', type=str, default=None, nargs="?",
+        help='Text to colorize.')
 
     args0 = parser.parse_args()
-    if (args0.color is None and ('CLI_COLOR' in os.environ)): args0.color = True
-    if (args0.colors):
-        args0.colors = re.split(r'\s+', args0.colors.strip())
-    else:
-        args0.colors = 'blue'
+    if (not args0.colors):
+        if (args0.verbose): sys.stderr.write("Defaulting color.")
+        args0.colors = [ "red/white" ]
+    #for i in range(len(args0.colors)):
+    #    args0.colors[i] = re.sub(r'light\W?grey', 'white', args0.colors[i], re.I)
+    if (not args0.text): args0.text = args0.sampleText
     if (args0.verbose): lg.setVerbose(args0.verbose)
     return(args0)
-
 
 args = processOptions()
 color0 = args.colors[0]
@@ -989,21 +1028,27 @@ if (args.xterm256 and os.environ['TERM'] != "xterm256color"):
 if (args.table):
     showTable(sampleText=args.sampleText)
     sys.exit()
-elif (args.list):
+if (args.list):
     showList()
-elif (args.xterm256):
+    sys.exit()
+if (args.xterm256):
     try256()
-elif (args.effects):
+    sys.exit()
+if (args.effects and not args.table):
     showEffectSamples()
+    sys.exit()
 
-elif (args.helpls):
+if (args.helpls):
     LSColors.helpLSColors()
-elif (args.lslist):
+    sys.exit()
+if (args.lslist):
     LSColors.doLsList()
-elif (args.lsget != ""):
+    sys.exit()
+if (args.lsget != ""):
     LSColors.doLsGet(args.lsget)
+    sys.exit()
 
-elif (args.setenv):
+if (args.setenv):
     # You can't easily set the relevant environment since it's
     # owned by the parent process. So return a big string the caller can use....
     lsbuf = ""
@@ -1012,27 +1057,25 @@ elif (args.setenv):
         seq = re.sub(r'm$', '', seq)
         lsbuf += args.envPrefix + "_c='" + seq + "'"
     print(lsbuf)
+    sys.exit()
 
-elif (not args.colors):
+if (not args.colors):
     # Remaining commands require that a color be specified.
     sys.stderr.write("No color(s) specified.\n")
-elif (args.all):
-    # For '--all', copy stdin coloring each line.
-    # Support a list of colors to alternate among.
-    print("all: %s." % (all))
-    colorizeStdin()
-elif (args.warn):
-    sys.stderr.write(cm.colorize(color0, args.warn + "\n"))
-elif (args.msg):
-    print(cm.colorize(color0, args.msg))
-elif (args.txt):
-    print(cm.colorize(color0, " ".join(args.txt)))
-else:
-    lg.vMsg(1, "No special options, so expecting a color name.")
-    cName = args.colors
-    escString = colorSeq(cName)
+
+if (args.ansi or args.bps or args.zps):
+    escString = colorSeq(args.colors[0])
     if (not escString):
-        print("colorstring: Unknown color key '%s'. Use -h for help." % (cName))
-        sys.exit(0)
+        print("colorstring: Unknown color key '%s'. Use -h for help." % (args.colors[0]))
+        sys.exit(99)
     escString = outConvert(escString)
     print(escString, end="")
+    sys.exit()
+
+if (args.all):  # copy stdin coloring each line in rotation.
+    colorizeStdin()
+elif (args.warn):
+    sys.stderr.write(cm.colorize(args.text + "\n", argColor=color0))
+else:
+    #print("color0: %s, %s" % (color0, type(color0)))
+    print(cm.colorize(args.text, argColor=color0))
