@@ -136,7 +136,8 @@ if __name__ == "__main__":
             "--iencoding", type=str, metavar='E', default="utf-8",
             help='Assume this character set for input files.')
         parser.add_argument(
-            "--oformat", type=str, metavar='F', default="remove",
+            "--oformat", "--outputFormat", "--output-format",
+            type=str, metavar='F', default="remove",
             choices=[ 'remove', 'html' ],
             help='Assume this character set for input files.')
         parser.add_argument(

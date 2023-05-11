@@ -399,6 +399,7 @@ Fix wrong args to ColorManager.colorize(). Support --table + --effects.
 
 =To do=
 
+* Support numeric colors, too.
 * Move in the predefined patterns from Perl version.
 * Add alternate setup to tag stuff with HTML instead.
 * Consider integrating with mappings from `mathAlphanumerics.py`.
