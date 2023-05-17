@@ -859,8 +859,7 @@ def outConvert(s:str) -> str:
     """Convert to the desired output syntax.
     """
     if (args.lsset != ""):
-        if (args.verbose):
-            sys.stderr.write("Attempting --lsset for expr '%s'." % (args.lsset))
+        lg.info("Attempting --lsset for expr '%s'." % (args.lsset))
         orig = os.environ["LS_COLORS"]
         new = orig = re.sub(r'lsset=.*?(:|$)', '', orig)
         new = re.sub(r':+$', '', new)
@@ -869,9 +868,7 @@ def outConvert(s:str) -> str:
         s = "new:lsset=" + s
 
     elif (args.lscolorset):
-        if (args.verbose):
-            sys.stderr.write("Attempting --lscolorset for color '" +
-                args.lscolorset + "'.\n")
+        lg.info("Attempting --lscolorset for color '" + args.lscolorset + "'.\n")
         s = re.sub(r'^\[', '', s)
         s = re.sub(r'm$', '', s)
         orig = os.environ["LS_COLORS"]
@@ -1009,13 +1006,13 @@ you can give to this script (but you can change the prefix using `--envPrefix`."
         help='Text to colorize.')
 
     args0 = parser.parse_args()
+    if (args0.verbose): lg.setVerbose(args0.verbose)
     if (not args0.colors):
-        if (args0.verbose): sys.stderr.write("Defaulting color.")
+        lg.info("Defaulting color.")
         args0.colors = [ "red/white" ]
     #for i in range(len(args0.colors)):
     #    args0.colors[i] = re.sub(r'light\W?grey', 'white', args0.colors[i], re.I)
     if (not args0.text): args0.text = args0.sampleText
-    if (args0.verbose): lg.setVerbose(args0.verbose)
     return(args0)
 
 args = processOptions()
