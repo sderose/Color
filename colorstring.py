@@ -957,10 +957,10 @@ def processOptions():
     parser.add_argument("--helpls", "--help-ls", action='store_true',
         help="Show the file-type-names to set file colors for the 'ls' command")
     parser.add_argument("--list", action='store_true',
-        help="Show all known combination of colors and effects.")
+        help="Show all combination of colors and effects (use --table for just colors).")
     parser.add_argument("--sampleText", type=str, default="Sample", metavar="TXT",
         help="Set the text to be displayed with --table. Default: 'Sampler'.")
-    parser.add_argument("--table", action='store_true',
+    parser.add_argument("--table", "--chart", action='store_true',
         help="""Show the main color combinations as a table. This only includes
 the "plain" and "bold" effects, but shows all foreground/background
 combinations, along with the color names and numbers.

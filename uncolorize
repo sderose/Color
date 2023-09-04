@@ -3,7 +3,6 @@
 # uncolorize: Remove ANSI terminal color escape sequences, fake bold, etc.
 # 2015-08-31: Written by Steven J. DeRose.
 #
-from __future__ import print_function
 import sys
 import os
 import re
@@ -60,6 +59,8 @@ anyone still does letter+backspace+diacritic, the letter will be lost.
 
 
 =To do=
+
+Option to just report how many color escapes are found (maybe by color).
 
 Generalize definition (at least at option) to remove all ANSI terminal escapes.
 A complete "code", namely the "Control Sequence Introducer", is:
