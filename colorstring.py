@@ -583,14 +583,14 @@ class LSColors:
     def getColorName(code):   ### OBSOLETE, FIX
         code = re.sub(r'0+(\d)', "\\1", code)  # Strip any leading zeros
         code2 = ';;'.join(sorted(re.split(';', code)))
-        lg.vMsg(1, "normalized order: '%s' -> '%s'" % (str(code), str(code2)))
+        lg.info1("normalized order: '%s' -> '%s'" % (str(code), str(code2)))
 
         code = code2
         code = "[" + code + "m"
         for k in (colorTable):
             if (colorSeq(k) == code): return(k)
 
-        lg.vMsg(1, "Couldn't find '" + code + "' in color table.\n")
+        lg.info1("Couldn't find '" + code + "' in color table.\n")
         return("?")
 
     @staticmethod
