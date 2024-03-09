@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 #
 # colorConvert.py: Normalize various color specs.
-# 2016-04-14: Written. Copyright by Steven J. DeRose.
+# 2016-04-14: Written by Steven J. DeRose.
 #
-from __future__ import print_function
 import sys
 import os
 import re
@@ -17,7 +16,7 @@ lg = ALogger(1)
 palColors = {}
 
 __metadata__ = {
-    "title"        : "colorConvert.py",
+    "title"        : "colorConvert",
     "description"  : "Normalize various color specs.",
     "rightsHolder" : "Steven J. DeRose",
     "creator"      : "http://viaf.org/viaf/50334488",

@@ -18,7 +18,7 @@ cm = ColorManager()
 args = None
 
 __metadata__ = {
-    'title'        : "colorstring.py",
+    'title'        : "colorstring",
     'description'  : "Easy access to ANSI terminal color.",
     'rightsHolder' : "Steven J. DeRose",
     'creator'      : "http://viaf.org/viaf/50334488",
