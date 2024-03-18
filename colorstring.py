@@ -10,24 +10,24 @@ import re
 import argparse
 from subprocess import check_output, CalledProcessError
 
-import alogging
+import logging
 from ColorManager import ColorManager
 
-lg = alogging.ALogger(1)
+lg = logging.getLogger()
 cm = ColorManager()
 args = None
 
 __metadata__ = {
-    'title'        : "colorstring",
-    'description'  : "Easy access to ANSI terminal color.",
-    'rightsHolder' : "Steven J. DeRose",
-    'creator'      : "http://viaf.org/viaf/50334488",
-    'type'         : "http://purl.org/dc/dcmitype/Software",
-    'language'     : "Python 3.7",
-    'created'      : "2018-08-29",
-    'modified'     : "2022-12-07",
-    'publisher'    : "http://github.com/sderose",
-    'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
+    "title"        : "colorstring",
+    "description"  : "Easy access to ANSI terminal color.",
+    "rightsHolder" : "Steven J. DeRose",
+    "creator"      : "http://viaf.org/viaf/50334488",
+    "type"         : "http://purl.org/dc/dcmitype/Software",
+    "language"     : "Python 3.7",
+    "created"      : "2018-08-29",
+    "modified"     : "2022-12-07",
+    "publisher"    : "http://github.com/sderose",
+    "license"      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
 __version__ = __metadata__['modified']
 
@@ -471,7 +471,7 @@ def colorSeq(name):
     try:
         cs = cm.getColorString(name)
     except TypeError as e:
-        lg.error("Error in ColorManager: %s" % (e))
+        lg.error("Error in ColorManager: %s", e)
         cs = ""
     return cs
 
@@ -567,7 +567,7 @@ class LSColors:
             return None
         lsc = os.environ['LSCOLORS']
         if (len(lsc) != 22):
-            lg.error("Expected 22 chars in LSCOLORS, but got %d: '%s'." % (len(lsc), lsc))
+            lg.error("Expected 22 chars in LSCOLORS, but got %d: '%s'.", len(lsc), lsc)
             return
         colorPairList = []
         for codeStart in range(len(lsc)):
@@ -583,14 +583,14 @@ class LSColors:
     def getColorName(code):   ### OBSOLETE, FIX
         code = re.sub(r'0+(\d)', "\\1", code)  # Strip any leading zeros
         code2 = ';;'.join(sorted(re.split(';', code)))
-        lg.info1("normalized order: '%s' -> '%s'" % (str(code), str(code2)))
+        lg.log(logging.INFO-1, "normalized order: '%s' -> '%s'", str(code), str(code2))
 
         code = code2
         code = "[" + code + "m"
         for k in (colorTable):
             if (colorSeq(k) == code): return(k)
 
-        lg.info1("Couldn't find '" + code + "' in color table.\n")
+        lg.log(logging.INFO-1, "Couldn't find '%s' in color table.\n", code)
         return("?")
 
     @staticmethod
@@ -773,9 +773,9 @@ def setupEffects() -> None:
         "white"     : "wht",
     }
     effects = sorted(effectsOn.keys())
-    for e in range(len(effects)):
+    for effect in range(len(effects)):
         print("")
-        print("******* Colors with " + (effects[e] or "no") + " effect:")
+        print("******* Colors with " + (effects[effect] or "no") + " effect:")
 
         for fg in (atomicColors):
             print("fg: '%s'." % (fg))
@@ -784,7 +784,7 @@ def setupEffects() -> None:
                 sample = ' ' + shortMap[fg] + "/" + shortMap[bg] + ' '
                 if (args.breakLines): sep = "\n"
                 else: sep = " "
-                buf0 += colorizeString(sample, fg=fg, bg=bg, effect=eff) + sep
+                buf0 += colorizeString(sample, fg=fg, bg=bg, effect=effect) + sep
             print(buf0)
 
         print("")
@@ -859,7 +859,7 @@ def outConvert(s:str) -> str:
     """Convert to the desired output syntax.
     """
     if (args.lsset != ""):
-        lg.info("Attempting --lsset for expr '%s'." % (args.lsset))
+        lg.info("Attempting --lsset for expr '%s'.", args.lsset)
         orig = os.environ["LS_COLORS"]
         new = orig = re.sub(r'lsset=.*?(:|$)', '', orig)
         new = re.sub(r':+$', '', new)
@@ -868,7 +868,7 @@ def outConvert(s:str) -> str:
         s = "new:lsset=" + s
 
     elif (args.lscolorset):
-        lg.info("Attempting --lscolorset for color '" + args.lscolorset + "'.\n")
+        lg.info("Attempting --lscolorset for color '%s'.\n", args.lscolorset)
         s = re.sub(r'^\[', '', s)
         s = re.sub(r'm$', '', s)
         orig = os.environ["LS_COLORS"]
@@ -1006,7 +1006,9 @@ you can give to this script (but you can change the prefix using `--envPrefix`."
         help='Text to colorize.')
 
     args0 = parser.parse_args()
-    if (args0.verbose): lg.setVerbose(args0.verbose)
+    if (lg and args0.verbose):
+        logging.basicConfig(level=logging.INFO - args0.verbose,
+            format="%(message)s")
     if (not args0.colors):
         lg.info("Defaulting color.")
         args0.colors = [ "red/white" ]

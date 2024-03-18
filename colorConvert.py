@@ -9,10 +9,11 @@ import re
 import math
 import codecs
 import colorsys
+import logging
+
 import webcolors
 
-from alogging import ALogger
-lg = ALogger(1)
+lg = logging.getLogger()
 palColors = {}
 
 __metadata__ = {
@@ -116,10 +117,10 @@ knownSchemes = [ 'rgb', 'rgba', 'hsv', 'hsva', 'yiq', 'hls' ]
 token = r'\s*([\da-fA-F.]+%?)'
 try:
     fe = r'(\w+)\(%s,%s,%s(,%s)?\)' % (token,token,token,token)
-    print("Expr: /%s/'" % (fe))
+    print("Expr: /%s/'", fe)
     functionExpr = re.compile(fe)
 except re.error as e0:
-    print("Bad regex: '%s'.\n    %s" % (fe, e0))
+    print("Bad regex: '%s'.\n    %s", fe, e0)
     sys.exit()
 
 
@@ -134,8 +135,8 @@ def doOneFile(fh, path):
         try:
             rec = fh.readline()
         except IOError as e:
-            lg.error("Error (%s) reading record %d of '%s'." %
-                (type(e), recnum, path))
+            lg.error("Error (%s) reading record %d of '%s'.",
+                type(e), recnum, path)
             break
         if (len(rec) == 0): break # EOF
         recnum += 1
@@ -156,16 +157,16 @@ def cconvert(s):
     rgbString = None
     if (s in webcolors.HTML4_NAMES_TO_HEX):
         rgbString = webcolors.HTML4_NAMES_TO_HEX[s]
-        #print("Found '%s' in HTML4 colors. Got: %s." % (s, rgbString))
+        #print("Found '%s' in HTML4 colors. Got: %s.", s, rgbString)
     elif (s in webcolors.CSS2_NAMES_TO_HEX):
         rgbString = webcolors.CSS2_NAMES_TO_HEX[s]
-        #print("Found '%s' in CSS2 colors. Got: %s." % (s, rgbString))
+        #print("Found '%s' in CSS2 colors. Got: %s.", s, rgbString)
     elif (s in webcolors.CSS21_NAMES_TO_HEX):
         rgbString = webcolors.CSS21_NAMES_TO_HEX[s]
-        #print("Found '%s' in CSS2.1 colors. Got: %s." % (s, rgbString))
+        #print("Found '%s' in CSS2.1 colors. Got: %s.", s, rgbString)
     elif (s in webcolors.CSS3_NAMES_TO_HEX):
         rgbString = webcolors.CSS3_NAMES_TO_HEX[s]
-        #print("Found '%s' in CSS3 colors. Got: %s." % (s, rgbString))
+        #print("Found '%s' in CSS3 colors. Got: %s.", s, rgbString)
     if (rgbString is not None):
         s = rgbString
 
@@ -319,7 +320,9 @@ def processOptions():
         help='Path(s) to input file(s)')
 
     args0 = parser.parse_args()
-    if (args0.verbose): lg.setVerbose(args0.verbose)
+    if (lg and args0.verbose):
+        logging.basicConfig(level=logging.INFO - args0.verbose,
+            format="%(message)s")
     if (args0.color is None):
         args0.color = ("CLI_COLOR" in os.environ and sys.stderr.isatty())
     lg.setColors(args0.color)
@@ -332,7 +335,7 @@ if (args.pal):
     try:
         pfh = codecs.open(args.pal, mode='r', encoding=args.iencoding)
     except IOError:
-        lg.error("Can't open -pal file '%s'." % (args.pal))
+        lg.error("Can't open -pal file '%s'.", args.pal)
         sys.exit()
     precnum = 0
     while (True):
@@ -341,7 +344,7 @@ if (args.pal):
         precnum += 1
         rec0 = rec0.trim()
         if (not re.match('#[0-9a-fA-F]{6,6}', rec0)):
-            lg.error("%s:%d: Bad record: '%s'." % (args.pal, precnum, rec0))
+            lg.error("%s:%d: Bad record: '%s'.", args.pal, precnum, rec0)
             sys.exit()
         else:
             palColors[rec0] = 1
@@ -355,7 +358,7 @@ else:
         try:
             fh0 = codecs.open(f, mode='r', encoding=args.iencoding)
         except IOError:
-            lg.error("Can't open '%s'." % (f))
+            lg.error("Can't open '%s'.", f)
             sys.exit()
         doOneFile(fh0, f)
         fh0.close()
