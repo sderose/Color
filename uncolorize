@@ -11,16 +11,16 @@ import codecs
 from ColorManager import ColorManager
 
 __metadata__ = {
-    'title'        : "uncolorize",
-    'description'  : "Remove or translate ANSI terminal color, etc.",
-    'rightsHolder' : "Steven J. DeRose",
-    'creator'      : "http://viaf.org/viaf/50334488",
-    'type'         : "http://purl.org/dc/dcmitype/Software",
-    'language'     : "Python 3.7",
-    'created'      : "2015-08-31",
-    'modified'     : "2021-01-25",
-    'publisher'    : "http://github.com/sderose",
-    'license'      : "https://creativecommons.org/licenses/by-sa/3.0/"
+    "title"        : "uncolorize",
+    "description"  : "Remove or translate ANSI terminal color, etc.",
+    "rightsHolder" : "Steven J. DeRose",
+    "creator"      : "http://viaf.org/viaf/50334488",
+    "type"         : "http://purl.org/dc/dcmitype/Software",
+    "language"     : "Python 3.7",
+    "created"      : "2015-08-31",
+    "modified"     : "2021-01-25",
+    "publisher"    : "http://github.com/sderose",
+    "license"      : "https://creativecommons.org/licenses/by-sa/3.0/"
 }
 __version__ = __metadata__['modified']
 
@@ -63,16 +63,8 @@ anyone still does letter+backspace+diacritic, the letter will be lost.
 Option to just report how many color escapes are found (maybe by color).
 
 Generalize definition (at least at option) to remove all ANSI terminal escapes.
-A complete "code", namely the "Control Sequence Introducer", is:
-
-    ESC [ [0–9:;<=>?]* [- !"#$%&'()*+,./]* [@A–Z[\\]^_`a–z{|}~]
-           x30-x3f      x20-x2f            x40–x7E
-           parameter    intermediate       final
-
 In practice the parameter group is almost always
 a list of semicolon-separated numbers.
-
-Sequences containing the parameter bytes `[<=>?]` or the final bytes x70–x7E `[p–z{|}~]` are private.
 
 
 =History=

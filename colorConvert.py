@@ -31,7 +31,7 @@ __metadata__ = {
 __version__ = __metadata__["modified"]
 
 
-descr="""
+descr = """
 =Description=
 
 [not quite finished]
