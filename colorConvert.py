@@ -142,8 +142,8 @@ def doOneFile(fh, path):
         recnum += 1
         rec = rec.rstrip()
         rgbTriple = cconvert(rec)
-        outColor = serialize(rgbTriple, args.out)
-        if (args.pal):
+        outColor = serialize(rgbTriple, args.oformat)
+        if (args.palette):
             #nearest = findNearestPalColor(serialize(rgbTriple, 'rgb6'))
             #outColor += '\t Nearest: %s' % (nearest)
             lg.error("PAL not yet supported.")
@@ -290,29 +290,29 @@ def processOptions():
         "--color", # Don't default. See below.
         help='Colorize the output.')
     parser.add_argument(
-        "--iencoding", type=str, metavar='E', default="utf-8",
+        "--iencoding", "--input-encoding", type=str, metavar="E", default="utf-8",
         help='Assume this character set for input files. Default: utf-8.')
     parser.add_argument(
-        "--oencoding", type=str, metavar='E',
+        "--oencoding", "--output-encoding", type=str, metavar="E",
         help='Use this character set for output files.')
     parser.add_argument(
-        "--out", type=str, default='rgb6', choices=
+        "--oformat", "--output-format", type=str, default='rgb6', choices=
         [ 'rgb3', 'rgb6', 'rgb9', 'rgbdec', 'rgb%', 'hsv', 'hsl', 'yiq', 'name' ],
-        help='Suppress most messages.')
+        help='Which color format to use for output.')
     parser.add_argument(
-        "--pal", type=str,
+        "--palette", type=str,
         help='File of "known" colors, one per line as #RRGGBB.')
     parser.add_argument(
-        "--quiet", "-q", action='store_true',
+        "--quiet", "-q", action="store_true",
         help='Suppress most messages.')
     parser.add_argument(
-        "--unicode", action='store_const', dest='iencoding',
+        "--unicode", action="store_const", dest='iencoding',
         const='utf8', help='Assume utf-8 for input files.')
     parser.add_argument(
-        "--verbose", "-v", action='count', default=0,
+        "--verbose", "-v", action="count", default=0,
         help='Add more messages (repeatable).')
     parser.add_argument(
-        "--version", action='version', version=__version__,
+        "--version", action="version", version=__version__,
         help='Display version information, then exit.')
 
     parser.add_argument(
@@ -331,11 +331,11 @@ def processOptions():
 
 args = processOptions()
 
-if (args.pal):
+if (args.palette):
     try:
-        pfh = codecs.open(args.pal, mode='r', encoding=args.iencoding)
+        pfh = codecs.open(args.palette, mode='r', encoding=args.iencoding)
     except IOError:
-        lg.error("Can't open -pal file '%s'.", args.pal)
+        lg.error("Can't open -pal file '%s'.", args.palette)
         sys.exit()
     precnum = 0
     while (True):
@@ -344,7 +344,7 @@ if (args.pal):
         precnum += 1
         rec0 = rec0.trim()
         if (not re.match('#[0-9a-fA-F]{6,6}', rec0)):
-            lg.error("%s:%d: Bad record: '%s'.", args.pal, precnum, rec0)
+            lg.error("%s:%d: Bad record: '%s'.", args.palette, precnum, rec0)
             sys.exit()
         else:
             palColors[rec0] = 1

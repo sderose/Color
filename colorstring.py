@@ -926,41 +926,41 @@ def processOptions():
 
     # Output color(s) and format choices
     #
-    parser.add_argument("--colors", "-c", type=str, action='append',
+    parser.add_argument("--colors", "-c", type=str, action="append",
         help="Color to use (e.g., 'red/white/bold'). Repeat to cycle by line.")
-    parser.add_argument("--perl", action='store_true',
+    parser.add_argument("--perl", action="store_true",
         help="Return Perl code to generate and assign the color string.")
-    parser.add_argument("--python", action='store_true',
+    parser.add_argument("--python", action="store_true",
         help="Return Python code to generate and assign the color string.")
-    parser.add_argument("--printStuff", action='store_true',
+    parser.add_argument("--printStuff", action="store_true",
         help="Print out the color string requested.")
-    parser.add_argument("--ansi", action='store_true',
+    parser.add_argument("--ansi", action="store_true",
         help="Return a literal ANSI color escape string.")
-    parser.add_argument("--bps", "--bash", action='store_true',
+    parser.add_argument("--bps", "--bash", action="store_true",
         help="Return a color command escaped as for a Bash prompt string.")
-    parser.add_argument("--zps", "--zsh", action='store_true',
+    parser.add_argument("--zps", "--zsh", action="store_true",
         help="Return a color command in the form for a zsh prompt string.")
 
     # What to actually colorize and where to send it.
     #
-    parser.add_argument("--all", action='store_true',
+    parser.add_argument("--all", action="store_true",
         help="Show all of stdin in the 'colorname'.")
-    parser.add_argument("--warn", "-w", action='store_true',
+    parser.add_argument("--warn", "-w", action="store_true",
         help="Send the text to stderr.")
 
     # Lists and charts and such
     #
-    parser.add_argument("--breakLines", action='store_true',
+    parser.add_argument("--breakLines", action="store_true",
         help="With `--list`, put each example on a separate line.")
-    parser.add_argument("--effects", action='store_true',
+    parser.add_argument("--effects", action="store_true",
         help="Show sample of each effect, to see if your terminal supports it.")
-    parser.add_argument("--helpls", "--help-ls", action='store_true',
+    parser.add_argument("--helpls", "--help-ls", action="store_true",
         help="Show the file-type-names to set file colors for the 'ls' command")
-    parser.add_argument("--list", action='store_true',
+    parser.add_argument("--list", action="store_true",
         help="Show all combination of colors and effects (use --table for just colors).")
     parser.add_argument("--sampleText", type=str, default="Sample", metavar="TXT",
         help="Set the text to be displayed with --table. Default: 'Sampler'.")
-    parser.add_argument("--table", "--chart", action='store_true',
+    parser.add_argument("--table", "--chart", action="store_true",
         help="""Show the main color combinations as a table. This only includes
 the "plain" and "bold" effects, but shows all foreground/background
 combinations, along with the color names and numbers.
@@ -976,11 +976,11 @@ See also `--breakLines`, `--list`, `--sampleText`, `-v`, and `--xterm256`.""")
         help="""Find what color `ls` will use to display file names.
 Provide a sample file to specify a category (see 'man ls', or the -h here).
 This requires the 'dirColors' command (mainly available on Linux.""")
-    parser.add_argument("--lslist", "--showlscolors", action='store_true',
+    parser.add_argument("--lslist", "--showlscolors", action="store_true",
         help="List how `ls` colors are set up, organized by color.")
     parser.add_argument("--lsset", type=str, default="",
         help="Return a modified `ls` color setup (see above).")
-    parser.add_argument("--setenv", "--envset", action='store_true',
+    parser.add_argument("--setenv", "--envset", action="store_true",
         help="""Returns a (long) string you can
 use to set a lot of environment variables, to hold the required escapes to
 set given colors. The variable names are 'COLORSTRING_' plus the color names
@@ -988,15 +988,15 @@ you can give to this script (but you can change the prefix using `--envPrefix`."
 
     # Miscellaneous options
     #
-    parser.add_argument("--quiet", "-q", action='store_true',
+    parser.add_argument("--quiet", "-q", action="store_true",
         help='Suppress most messages.')
     parser.add_argument(
-        "--verbose", "-v", action='count', default=0,
+        "--verbose", "-v", action="count", default=0,
         help='Add more messages (repeatable).')
     parser.add_argument(
-        "--version", action='version', version=__version__,
+        "--version", action="version", version=__version__,
         help='Display version information, then exit.')
-    parser.add_argument("--xterm256", action='store_true',
+    parser.add_argument("--xterm256", action="store_true",
         help="Enable the 256-color set supported by TERM=xterm-256color.")
 
     # Rest of arguments (non-option text)

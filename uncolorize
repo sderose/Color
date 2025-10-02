@@ -126,24 +126,24 @@ if __name__ == "__main__":
             parser = argparse.ArgumentParser(description=descr)
 
         parser.add_argument(
-            "--iencoding", type=str, metavar='E', default="utf-8",
+            "--iencoding", "--input-encoding", type=str, metavar="E", default="utf-8",
             help='Assume this character set for input files.')
         parser.add_argument(
-            "--oformat", "--outputFormat", "--output-format",
-            type=str, metavar='F', default="remove",
+            "--oformat", "--output-format",
+            type=str, metavar="F", default="remove",
             choices=[ 'remove', 'html' ],
             help='Assume this character set for input files.')
         parser.add_argument(
-            "--unicode", action='store_const', dest='iencoding',
+            "--unicode", action="store_const", dest='iencoding',
             const='utf8', help='Assume utf-8 for input files.')
         parser.add_argument(
             "--unman", action="store_true",
             help="Remove `man`-style boldface.")
         parser.add_argument(
-            "--verbose", "-v", action='count', default=0,
+            "--verbose", "-v", action="count", default=0,
             help='Add more messages (repeatable).')
         parser.add_argument(
-            '--version', action='version', version='Version of '+__version__,
+            '--version', action="version", version='Version of '+__version__,
             help='Display version information, then exit.')
 
         parser.add_argument(
